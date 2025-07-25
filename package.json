@@ -36,7 +36,7 @@
     "@biomejs/biome": "1.9.4",
     "@stylistic/eslint-plugin": "^2.3.0",
     "@tsconfig/recommended": "^1.0.7",
-    "@types/node": "^20.14.10",
+    "@types/node": "^24.1.0",
     "@types/pg": "^8.11.2",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
