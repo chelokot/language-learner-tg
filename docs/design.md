@@ -14,59 +14,51 @@ This document describes the architecture of the **State‑Based Spaced Repetitio
 |------------------|-------------------------------------------|
 | Runtime          | Vercel Functions (Node 20)               |
 | Bot framework    | [ts-tg-bot template](https://github.com/ExposedCat/ts-tg-bot) with grammY |
-| Database         | Vercel Postgres + Drizzle ORM            |
-| Cache / Sessions | Vercel KV (Upstash Redis)                |
-| File storage     | Vercel Blob for imports                  |
+| Database         | Vercel Postgres via `@vercel/postgres`   |
 
 All code is written in TypeScript with ES modules.
 
-## Database schema (Drizzle ORM)
+## Database schema
 
-```ts
-pgTable('user', {
-  id: serial('id').primaryKey(),
-  tgId: bigint('telegram_id').unique().notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+```sql
+CREATE TABLE app_user (
+  user_id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL
+);
 
-pgTable('word_base', {
-  id: serial('id').primaryKey(),
-  ownerId: integer('owner_id').references('user.id'), // creator of the base
-  name: text('name').notNull(),
-  public: boolean('public').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+CREATE TABLE chat (
+  chat_id BIGINT PRIMARY KEY,
+  title TEXT NOT NULL
+);
 
-pgTable('word', {
-  id: serial('id').primaryKey(),
-  baseId: integer('base_id').references('word_base.id'),
-  front: text('front').notNull(),
-  back: text('back').notNull(),
-});
+CREATE TABLE word_base (
+  id SERIAL PRIMARY KEY,
+  owner_id BIGINT REFERENCES app_user(user_id),
+  name TEXT NOT NULL
+);
 
-pgTable('exercise', {
-  id: serial('id').primaryKey(),
-  baseId: integer('base_id').references('word_base.id'),
-  seed: uuid('seed').defaultRandom(),  // deterministic shuffle per base
-  createdAt: timestamp('created_at').defaultNow(),
-});
+CREATE TABLE word (
+  id SERIAL PRIMARY KEY,
+  base_id INTEGER REFERENCES word_base(id),
+  front TEXT NOT NULL,
+  back TEXT NOT NULL
+);
 
-pgTable('exercise_state', {
-  id: serial('id').primaryKey(),
-  exerciseId: integer('exercise_id').references('exercise.id'),
-  userId: integer('user_id').references('user.id'),
-  position: integer('position').default(0),
-  multiplier: real('multiplier').default(1.5),  // per-user tuning
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+CREATE TABLE exercise_state (
+  id SERIAL PRIMARY KEY,
+  base_id INTEGER REFERENCES word_base(id),
+  user_id BIGINT REFERENCES app_user(user_id),
+  position INTEGER DEFAULT 0,
+  multiplier REAL DEFAULT 1.5
+);
 
-pgTable('score', {
-  stateId: integer('state_id').references('exercise_state.id'),
-  wordId: integer('word_id').references('word.id'),
-  score: real('score').default(1),
-  nextSlot: integer('next_slot').default(0),
-  primaryKey: (stateId, wordId),
-});
+CREATE TABLE score (
+  state_id INTEGER REFERENCES exercise_state(id),
+  word_id INTEGER REFERENCES word(id),
+  score REAL DEFAULT 1,
+  next_slot INTEGER DEFAULT 0,
+  PRIMARY KEY(state_id, word_id)
+);
 ```
 
 ## SBSR algorithm
