@@ -7,6 +7,7 @@ Follow these steps to run the bot on Vercel.
 3. During setup add a Postgres database (Storage -> Add Database -> Postgres). Vercel
    will create the database and populate the `DATABASE_URL` environment variable.
 4. Add the environment variable `TOKEN` with the token provided by BotFather.
+   The HTTP function defined in `api/bot.ts` will handle Telegram updates.
 5. Deploy the project. The build step runs `npm run postdeploy` which
    automatically creates the database schema from `sql/schema.sql` and
    configures the Telegram webhook using `WEBHOOK_URL` or `VERCEL_URL`.

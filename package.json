@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "compile": "tsc",
-    "postcompile": "cp -r src/locales build && cp -r sql build",
+    "postcompile": "cp -r src/locales build && cp -r sql build && mkdir -p api && cp build/api/* api/",
     "postdeploy": "node build/src/scripts/postdeploy.js",
     "build": "npm run compile && npm run postdeploy",
     "bg:start": "npm run prepare && pm2 start build/index.js --name telegram-bot",

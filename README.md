@@ -30,6 +30,9 @@ The repository follows a strict **test‑driven development** approach.  Every n
 2. `npm install`
 3. `npm test`
 
+The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when
+setting up the Telegram webhook.
+
 See [docs/design.md](docs/design.md) for architectural details.
 
 ## Deploying to Vercel
