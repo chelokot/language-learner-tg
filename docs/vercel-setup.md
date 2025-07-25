@@ -5,7 +5,7 @@ Follow these steps to run the bot on Vercel.
 1. Push this repository to GitHub.
 2. In the Vercel dashboard choose **New Project** and import the repo.
 3. During setup add a Postgres database (Storage -> Add Database -> Postgres). Vercel
-   will create the database and populate the `POSTGRES_URL` environment variable.
+   will create the database and populate the `DATABASE_URL` environment variable.
 4. Add the environment variable `TOKEN` with the token provided by BotFather.
 5. Deploy the project. After the first deployment open the database console and
    execute the SQL schema from [docs/design.md](design.md).

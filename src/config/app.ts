@@ -6,7 +6,7 @@ import { connectToDb } from './database.js';
 export async function startApp() {
   try {
     loadEnv('../../.env');
-    validateEnv(['TOKEN', 'POSTGRES_URL']);
+    validateEnv(['TOKEN', 'DATABASE_URL']);
   } catch (error) {
     console.error('Error occurred while loading environment:', error);
     process.exit(1);
