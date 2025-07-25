@@ -1,16 +1,13 @@
-import type { Collection } from 'mongodb';
+import type { VercelPool } from '@vercel/postgres';
 
 export interface User {
-  userId: number;
+  user_id: number;
   name: string;
 }
 
 export interface Chat {
-  chatId: number;
+  chat_id: number;
   title: string;
 }
 
-export interface Database {
-  user: Collection<User>;
-  chat: Collection<Chat>;
-}
+export type Database = VercelPool;

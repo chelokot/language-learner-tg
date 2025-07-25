@@ -1,5 +1,5 @@
 import type { I18n } from '@grammyjs/i18n/dist/source/i18n.js';
-import { Bot as TelegramBot, session } from 'grammy';
+import { Bot as TelegramBot } from 'grammy';
 
 import { startController } from '../controllers/start.js';
 import { stopController } from '../controllers/stop.js';
@@ -48,7 +48,6 @@ function setupPreControllers(_bot: Bot) {
 }
 
 function setupMiddlewares(bot: Bot, localeEngine: I18n) {
-  bot.use(session());
   bot.use(localeEngine.middleware());
   // eslint-disable-next-line github/no-then
   bot.catch(console.error);

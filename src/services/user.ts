@@ -4,27 +4,10 @@ export function buildName(firstName: string, lastName?: string) {
   return lastName ? `${firstName} ${lastName}` : firstName;
 }
 
-async function createUser(args: { db: Database; userId: number; name: string }): Promise<User> {
-  const userObject = {
-    userId: args.userId,
-    name: args.name,
-  } as User;
-
-  await args.db.user.insertOne(userObject);
-
-  return userObject;
-}
-
 export async function getOrCreateUser(args: { db: Database; userId: number; name: string }): Promise<User> {
-  const user = await args.db.user.findOneAndUpdate(
-    { userId: args.userId },
-    { $set: { name: args.name } },
-    { returnDocument: 'after' },
+  const result = await args.db.query<User>(
+    'INSERT INTO app_user (user_id, name) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET name = EXCLUDED.name RETURNING user_id, name',
+    [args.userId, args.name],
   );
-
-  if (user.ok && user.value) {
-    return user.value;
-  }
-
-  return createUser(args);
+  return result.rows[0];
 }

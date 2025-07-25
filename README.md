@@ -6,8 +6,7 @@ A spaced repetition Telegram bot built in TypeScript. The bot uses serverless fu
 
 - TypeScript
 - grammY via [ts-tg-bot](https://github.com/ExposedCat/ts-tg-bot)
-- Vercel Postgres + Drizzle ORM
-- Vercel KV (Upstash Redis)
+- Vercel Postgres via `@vercel/postgres`
 - Vitest for tests
 
 ## Project structure
@@ -32,3 +31,8 @@ The repository follows a strict **test‑driven development** approach.  Every n
 3. `npm test`
 
 See [docs/design.md](docs/design.md) for architectural details.
+
+## Deploying to Vercel
+
+Detailed deployment instructions are available in
+[docs/vercel-setup.md](docs/vercel-setup.md).
