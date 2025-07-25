@@ -11,7 +11,8 @@
     "bg:logs": "pm2 logs telegram-bot --lines 1000 -f",
     "start": "npm run compile && node .",
     "lint": "npx biome check src/ --write",
-    "format": "npx biome format src/ --write"
+    "format": "npx biome format src/ --write",
+    "test": "vitest run"
   },
   "keywords": [
     "telegram",
@@ -45,7 +46,8 @@
     "eslint-plugin-sonarjs": "^1.0.3",
     "prettier": "^3.3.2",
     "prettier-eslint": "^16.3.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.4"
   },
   "type": "module",
   "engines": {
