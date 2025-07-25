@@ -35,4 +35,6 @@ See [docs/design.md](docs/design.md) for architectural details.
 ## Deploying to Vercel
 
 Detailed deployment instructions are available in
-[docs/vercel-setup.md](docs/vercel-setup.md).
+[docs/vercel-setup.md](docs/vercel-setup.md). The build process runs
+`npm run postdeploy` which prepares the database schema and configures
+the Telegram webhook automatically.

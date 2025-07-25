@@ -6,6 +6,8 @@
   "scripts": {
     "compile": "tsc",
     "postcompile": "cp -r src/locales build",
+    "postdeploy": "node build/scripts/postdeploy.js",
+    "build": "npm run compile && npm run postdeploy",
     "bg:start": "npm run prepare && pm2 start build/index.js --name telegram-bot",
     "bg:restart": "npm run prepare && pm2 restart telegram-bot",
     "bg:logs": "pm2 logs telegram-bot --lines 1000 -f",
