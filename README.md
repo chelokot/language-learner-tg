@@ -30,9 +30,17 @@ The repository follows a strict **test‑driven development** approach.  Every n
 2. `npm install`
 3. `npm test`
 
+The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when
+setting up the Telegram webhook.
+
 See [docs/design.md](docs/design.md) for architectural details.
 
 ## Deploying to Vercel
 
 Detailed deployment instructions are available in
-[docs/vercel-setup.md](docs/vercel-setup.md).
+[docs/vercel-setup.md](docs/vercel-setup.md). The `vercel.json` file
+sets the output directory to the repository root so Vercel deploys the
+compiled API functions. The build process runs `npm run postdeploy`
+which prepares the database schema and configures the Telegram webhook
+automatically. Locale files in `src/locales` are bundled via
+`vercel.json` so translations work in production.
