@@ -23,4 +23,8 @@ export async function registerWebhook(token: string, baseUrl: string, fetchFn = 
     const text = await res.text();
     throw new Error(`Webhook setup failed: ${res.status} ${text}`);
   }
+  const data = (await res.json()) as { ok: boolean; description?: string };
+  if (!data.ok) {
+    throw new Error(`Webhook setup failed: ${data.description ?? 'unknown error'}`);
+  }
 }

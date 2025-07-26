@@ -14,10 +14,19 @@ describe('applySchema', () => {
 
 describe('registerWebhook', () => {
   it('calls Telegram API with proper URL', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     await registerWebhook('abc', 'https://example.com', fetchMock);
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.telegram.org/botabc/setWebhook?url=https://example.com/api/bot'
+    );
+  });
+
+  it('throws when Telegram returns ok=false', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ ok: false, description: 'bad' }) });
+    await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow(
+      'Webhook setup failed: bad'
     );
   });
 });
