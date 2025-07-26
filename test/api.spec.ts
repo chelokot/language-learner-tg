@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, type Mock } from 'vitest';
 
 vi.mock('../src/config/database.js', () => ({ connectToDb: vi.fn(async () => ({})) }));
 vi.mock('../src/config/bot.js', () => ({ createBot: vi.fn(() => ({})) }));
@@ -21,7 +21,7 @@ async function call() {
 describe('api handler', () => {
   it('initializes bot only once', async () => {
     const cb = vi.fn();
-    (webhookCallback as unknown as vi.Mock).mockReturnValue(cb);
+    (webhookCallback as unknown as Mock).mockReturnValue(cb);
     process.env.TOKEN = 't';
     process.env.DATABASE_URL = 'postgres://x';
 
