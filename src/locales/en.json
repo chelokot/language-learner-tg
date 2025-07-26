@@ -1,4 +1,5 @@
 {
   "start": "[${chatName}] Hi there, ${name}!",
-  "stop": "[${chatName}] Bye, ${name}!"
+  "stop": "[${chatName}] Bye, ${name}!",
+  "help": "Use /menu to manage word bases and start exercises"
 }

@@ -4,6 +4,7 @@ export declare global {
     interface ProcessEnv {
       TOKEN: string;
       DATABASE_URL: string;
+      TELEGRAM_API_ROOT?: string;
     }
   }
 }
