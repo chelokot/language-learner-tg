@@ -20,7 +20,7 @@ A spaced repetition Telegram bot built in TypeScript. The bot uses serverless fu
 
 - `npm run lint` – check formatting with Biome
 - `npm run format` – format the code
-- `npm test` – run unit tests
+- `npm test` – run unit and integration tests
 
 The repository follows a strict **test‑driven development** approach.  Every new feature starts with a failing test which is then made to pass.  See `docs/design.md` for the details of the SBSR algorithm and database structure.
 

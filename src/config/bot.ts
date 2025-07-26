@@ -3,6 +3,8 @@ import { Bot as TelegramBot } from 'grammy';
 
 import { startController } from '../controllers/start.js';
 import { stopController } from '../controllers/stop.js';
+import { setupMenu } from '../controllers/menu.js';
+import { helpController } from '../controllers/help.js';
 import { resolvePath } from '../helpers/resolve-path.js';
 import { getOrCreateChat } from '../services/chat.js';
 import { createReplyWithTextFunc } from '../services/context.js';
@@ -56,12 +58,16 @@ function setupMiddlewares(bot: Bot, localeEngine: I18n) {
 function setupControllers(bot: Bot) {
   bot.use(startController);
   bot.use(stopController);
+  bot.use(helpController);
+  setupMenu(bot);
 }
 
 export async function startBot(database: Database) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
-  const bot = new TelegramBot<CustomContext>(process.env.TOKEN);
+  const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {
+    client: process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : undefined,
+  });
 
   setupPreControllers(bot);
   extendContext(bot, database);
