@@ -58,7 +58,7 @@ function setupControllers(bot: Bot) {
   bot.use(stopController);
 }
 
-export async function startBot(database: Database) {
+export function createBot(database: Database) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN);
@@ -67,6 +67,12 @@ export async function startBot(database: Database) {
   extendContext(bot, database);
   setupMiddlewares(bot, i18n);
   setupControllers(bot);
+
+  return bot;
+}
+
+export async function startBot(database: Database) {
+  const bot = createBot(database);
 
   return new Promise(resolve =>
     bot.start({
