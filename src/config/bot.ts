@@ -7,45 +7,11 @@ import { stopController } from "../controllers/stop.js";
 import { setupMenu } from "../controllers/menu.js";
 import { helpController } from "../controllers/help.js";
 import { resolvePath } from "../helpers/resolve-path.js";
-import { getOrCreateChat } from "../services/chat.js";
-import { createReplyWithTextFunc } from "../services/context.js";
-import { buildName, getOrCreateUser } from "../services/user.js";
 import type { CustomContext } from "../types/context.js";
-import type { Chat, Database } from "../types/database.js";
+import type { Database } from "../types/database.js";
 import type { Bot } from "../types/telegram.js";
 import { initLocaleEngine } from "./locale-engine.js";
-
-function extendContext(bot: Bot, database: Database) {
-  bot.use(async (ctx, next) => {
-    if (!ctx.chat || !ctx.from) {
-      await next();
-      return;
-    }
-
-    ctx.text = createReplyWithTextFunc(ctx);
-    ctx.db = database;
-
-    let chat: Chat | null = null;
-    if (ctx.chat.type !== "private") {
-      chat = await getOrCreateChat({
-        db: database,
-        chatId: ctx.chat.id,
-        title: ctx.chat.title,
-      });
-    }
-
-    ctx.dbEntities = {
-      user: await getOrCreateUser({
-        db: database,
-        userId: ctx.from.id,
-        name: buildName(ctx.from.first_name, ctx.from.last_name),
-      }),
-      chat,
-    };
-
-    await next();
-  });
-}
+import { createExtendContextMiddleware } from "./extend-context.js";
 
 function setupPreControllers(_bot: Bot) {
   // e.g. inline-mode controllers
@@ -73,9 +39,19 @@ export function createBot(database: Database) {
       : undefined,
   });
 
+  // Create context extension middleware
+  const extendContextMiddleware = createExtendContextMiddleware(database);
+
   setupPreControllers(bot);
-  extendContext(bot, database);
-  bot.use(conversations());
+
+  // Set up context extension both outside and inside conversations
+  bot.use(extendContextMiddleware);
+  bot.use(
+    conversations({
+      plugins: [extendContextMiddleware],
+    }),
+  );
+
   setupMiddlewares(bot, i18n);
   setupControllers(bot);
 
