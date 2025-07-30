@@ -6,6 +6,7 @@ export declare global {
       DATABASE_URL: string;
       VERCEL_URL?: string;
       WEBHOOK_URL?: string;
+      TELEGRAM_API_ROOT?: string;
     }
   }
 }
