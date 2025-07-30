@@ -1,10 +1,10 @@
-import type { NextFunction } from "grammy";
-import { createReplyWithTextFunc } from "../services/context.js";
-import { buildName, getOrCreateUser } from "../services/user.js";
-import { getOrCreateChat } from "../services/chat.js";
-import type { Bot } from "../types/telegram.js";
-import type { CustomContext } from "../types/context.js";
-import type { Database, Chat } from "../types/database.js";
+import type { NextFunction } from 'grammy';
+import { getOrCreateChat } from '../services/chat.js';
+import { createReplyWithTextFunc } from '../services/context.js';
+import { buildName, getOrCreateUser } from '../services/user.js';
+import type { CustomContext } from '../types/context.js';
+import type { Chat, Database } from '../types/database.js';
+import type { Bot } from '../types/telegram.js';
 
 export function createExtendContextMiddleware(database: Database) {
   return async (ctx: CustomContext, next: NextFunction) => {
@@ -26,7 +26,7 @@ export function createExtendContextMiddleware(database: Database) {
 
     // Handle chat only for non-private chats
     let chat: Chat | null = null;
-    if (ctx.chat && ctx.chat.type !== "private") {
+    if (ctx.chat && ctx.chat.type !== 'private') {
       chat = await getOrCreateChat({
         db: database,
         chatId: ctx.chat.id,

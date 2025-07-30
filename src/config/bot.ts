@@ -1,17 +1,17 @@
-import type { I18n } from "@grammyjs/i18n/dist/source/i18n.js";
-import { Bot as TelegramBot } from "grammy";
-import { conversations } from "@grammyjs/conversations";
+import { conversations } from '@grammyjs/conversations';
+import type { I18n } from '@grammyjs/i18n/dist/source/i18n.js';
+import { Bot as TelegramBot } from 'grammy';
 
-import { startController } from "../controllers/start.js";
-import { stopController } from "../controllers/stop.js";
-import { setupMenu } from "../controllers/menu.js";
-import { helpController } from "../controllers/help.js";
-import { resolvePath } from "../helpers/resolve-path.js";
-import type { CustomContext } from "../types/context.js";
-import type { Database } from "../types/database.js";
-import type { Bot } from "../types/telegram.js";
-import { initLocaleEngine } from "./locale-engine.js";
-import { createExtendContextMiddleware } from "./extend-context.js";
+import { helpController } from '../controllers/help.js';
+import { setupMenu } from '../controllers/menu.js';
+import { startController } from '../controllers/start.js';
+import { stopController } from '../controllers/stop.js';
+import { resolvePath } from '../helpers/resolve-path.js';
+import type { CustomContext } from '../types/context.js';
+import type { Database } from '../types/database.js';
+import type { Bot } from '../types/telegram.js';
+import { createExtendContextMiddleware } from './extend-context.js';
+import { initLocaleEngine } from './locale-engine.js';
 
 function setupPreControllers(_bot: Bot) {
   // e.g. inline-mode controllers
@@ -31,12 +31,10 @@ function setupControllers(bot: Bot) {
 }
 
 export function createBot(database: Database) {
-  const localesPath = resolvePath(import.meta.url, "../locales");
+  const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {
-    client: process.env.TELEGRAM_API_ROOT
-      ? { apiRoot: process.env.TELEGRAM_API_ROOT }
-      : undefined,
+    client: process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : undefined,
   });
 
   // Create context extension middleware
@@ -61,7 +59,7 @@ export function createBot(database: Database) {
 export async function startBot(database: Database) {
   const bot = createBot(database);
 
-  return new Promise((resolve) =>
+  return new Promise(resolve =>
     bot.start({
       onStart: () => resolve(undefined),
     }),
