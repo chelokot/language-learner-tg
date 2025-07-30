@@ -10,5 +10,9 @@ This repository hosts a Telegram bot for spaced repetition based on serverless T
 * **CI**: GitHub workflow runs `npm ci` and `npm test`.
 * **Code style**: formatted with Biome (`npm run format`). Keep the codebase in ES modules and TypeScript. Node 20 or later.
 * **Docs**: maintain design documents in `docs/` describing architecture and database schema. Update README when public APIs or setup steps change.
+* **Conversation names**: You MUST use type-safe constants from `CONVERSATION_NAMES` for all conversation names (e.g. `ctx.conversation.enter(CONVERSATION_NAMES.createBase)`).  
+  Never use string literals for conversation names.  
+  If you see any string literal used for a conversation name, you MUST immediately refactor it to use the constant.  
+  This rule is mandatory for all code in this repository.
 
 These rules are mandatory for every change in this repository.
