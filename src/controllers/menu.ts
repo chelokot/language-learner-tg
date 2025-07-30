@@ -73,6 +73,9 @@ export async function createBaseConversation(
 ) {
   await ctx.reply("Send base name");
   const { message } = await conversation.wait();
+  console.log("ctx:", ctx);
+  console.log("ctx.dbEntities:", ctx.dbEntities);
+  console.log("ctx.dbEntities.user:", ctx.dbEntities?.user);
   const base = await createWordBase({
     db: ctx.db,
     ownerId: ctx.dbEntities.user.user_id,

@@ -18,6 +18,7 @@ import { initLocaleEngine } from "./locale-engine.js";
 function extendContext(bot: Bot, database: Database) {
   bot.use(async (ctx, next) => {
     if (!ctx.chat || !ctx.from) {
+      await next();
       return;
     }
 
