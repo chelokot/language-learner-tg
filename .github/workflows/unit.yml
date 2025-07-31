@@ -17,7 +17,7 @@ jobs:
       - run: npm run lint
       - run: npm run test:unit
       - uses: davelosert/vitest-coverage-report-action@v2
+        if: always()
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-title: Coverage Report
-          create-new-comment: true
+          name: Coverage Report

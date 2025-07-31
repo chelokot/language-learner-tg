@@ -15,8 +15,8 @@
     "lint": "npx biome check src/ --write",
     "format": "npx biome format src/ --write",
     "test": "vitest run --coverage",
-    "test:unit": "vitest run --coverage --exclude test/e2e/**",
-    "test:e2e": "vitest run test/e2e/**/*.spec.ts --coverage"
+    "test:unit": "vitest run --coverage --exclude \"test/e2e/**\"",
+    "test:e2e": "vitest run test/e2e --coverage"
   },
   "keywords": [
     "telegram",
