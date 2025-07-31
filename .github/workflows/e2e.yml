@@ -20,5 +20,9 @@ jobs:
       - run: npm run test:e2e -- --shard=${{ matrix.shard }}
       - uses: actions/upload-artifact@v4
         with:
-          name: e2e-reports
-          path: test/e2e/reports/*.pdf
+          name: help.pdf
+          path: test/e2e/reports/help.pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: user-story.pdf
+          path: test/e2e/reports/user-story.pdf

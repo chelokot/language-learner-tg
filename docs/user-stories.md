@@ -13,5 +13,5 @@ As a new user I want to create my own word base so that I can train translations
 
 This scenario is covered by end‑to‑end tests under `test/e2e`.
 Each run captures the entire chat transcript and saves a Telegram‑style PDF in
-`test/e2e/reports`. The CI workflow uploads these PDFs as artifacts so they can be
-downloaded from GitHub Actions.
+`test/e2e/reports`. The CI workflow uploads each PDF as its own artifact so it can be
+downloaded directly from GitHub Actions.
