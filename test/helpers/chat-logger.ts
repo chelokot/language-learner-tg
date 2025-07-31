@@ -17,9 +17,11 @@ export class ChatLogger {
 }
 
 import fs from 'fs';
+import path from 'path';
 import PDFDocument from 'pdfkit';
 
 export function generatePdf(events: Event[], file: string) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   const doc = new PDFDocument({ margin: 40 });
   doc.pipe(fs.createWriteStream(file));
   let y = 40;

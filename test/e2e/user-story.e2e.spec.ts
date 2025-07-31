@@ -5,6 +5,7 @@ import type { CustomContext } from '../../src/types/context.js';
 import type { Database } from '../../src/types/database.js';
 import { Bot } from 'grammy';
 import { ChatLogger, generatePdf } from '../helpers/chat-logger.js';
+import type { InlineKeyboardButton } from '@grammyjs/types';
 
 function createMemoryDb(): Database {
   let baseId = 1;
@@ -77,7 +78,7 @@ describe('basic user story e2e', () => {
     const menuUpdate = updates.result[0].message;
     logger.logBot(
       menuUpdate.text!,
-      menuUpdate.reply_markup?.inline_keyboard?.flat().map(b => b.text),
+      menuUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
     );
     const menuMsgId = menuUpdate.message_id;
 
@@ -92,7 +93,7 @@ describe('basic user story e2e', () => {
     const createUpdate = updates.result.at(-1)!.message;
     logger.logBot(
       createUpdate.text!,
-      createUpdate.reply_markup?.inline_keyboard?.flat().map(b => b.text),
+      createUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
     );
     const newMenuMsgId = createUpdate.message_id;
 
@@ -103,7 +104,7 @@ describe('basic user story e2e', () => {
     const baseUpdate = updates.result.at(-1)!.message;
     logger.logBot(
       baseUpdate.text!,
-      baseUpdate.reply_markup?.inline_keyboard?.flat().map(b => b.text),
+      baseUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
     );
     const baseMsgId = baseUpdate.message_id;
 
@@ -123,7 +124,7 @@ describe('basic user story e2e', () => {
       const msg = res.result.at(-1)!.message;
       logger.logBot(
         msg.text!,
-        msg.reply_markup?.inline_keyboard?.flat().map(b => b.text),
+        msg.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
       );
     }
 
@@ -142,7 +143,7 @@ describe('basic user story e2e', () => {
       const msg = res.result.at(-1)!.message;
       logger.logBot(
         msg.text!,
-        msg.reply_markup?.inline_keyboard?.flat().map(b => b.text),
+        msg.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
       );
       return msg.text!;
     }

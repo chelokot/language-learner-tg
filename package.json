@@ -18,7 +18,13 @@
     "test:unit": "vitest run --coverage --exclude \"test/e2e/**\"",
     "test:e2e": "vitest run test/e2e --coverage"
   },
-  "keywords": ["telegram", "bot", "grammy", "mongodb", "typescript"],
+  "keywords": [
+    "telegram",
+    "bot",
+    "grammy",
+    "mongodb",
+    "typescript"
+  ],
   "author": "ExposedCat",
   "license": "GPL-3.0-or-later",
   "dependencies": {
@@ -35,6 +41,7 @@
     "@stylistic/eslint-plugin": "^2.3.0",
     "@tsconfig/recommended": "^1.0.7",
     "@types/node": "^24.1.0",
+    "@types/pdfkit": "^0.17.2",
     "@types/pg": "^8.11.2",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
