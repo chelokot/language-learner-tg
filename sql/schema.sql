@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS app_user (
   user_id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL
+  name TEXT NOT NULL,
+  current_vocab_id INTEGER REFERENCES vocabulary(id)
 );
 
 CREATE TABLE IF NOT EXISTS chat (
@@ -8,7 +9,7 @@ CREATE TABLE IF NOT EXISTS chat (
   title TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS word_base (
+CREATE TABLE IF NOT EXISTS vocabulary (
   id SERIAL PRIMARY KEY,
   owner_id BIGINT REFERENCES app_user(user_id),
   name TEXT NOT NULL
@@ -16,14 +17,14 @@ CREATE TABLE IF NOT EXISTS word_base (
 
 CREATE TABLE IF NOT EXISTS word (
   id SERIAL PRIMARY KEY,
-  base_id INTEGER REFERENCES word_base(id),
+  vocabulary_id INTEGER REFERENCES vocabulary(id),
   front TEXT NOT NULL,
   back TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS exercise_state (
   id SERIAL PRIMARY KEY,
-  base_id INTEGER REFERENCES word_base(id),
+  vocabulary_id INTEGER REFERENCES vocabulary(id),
   user_id BIGINT REFERENCES app_user(user_id),
   position INTEGER DEFAULT 0,
   multiplier REAL DEFAULT 1.5

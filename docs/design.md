@@ -6,7 +6,7 @@ This document describes the architecture of the **State‑Based Spaced Repetitio
 
 * A Telegram bot that trains vocabulary via serverless functions on Vercel.
 * Stateless execution: order of cards is stored in Postgres; clients request the next card by sending a command.
-* Every user can maintain multiple word bases and exercises. Data is isolated per `telegram_id`.
+* Every user can maintain multiple vocabularies and exercises. Data is isolated per `telegram_id`.
 
 ## Tech stack
 
@@ -23,7 +23,8 @@ All code is written in TypeScript with ES modules.
 ```sql
 CREATE TABLE app_user (
   user_id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL
+  name TEXT NOT NULL,
+  current_vocab_id INTEGER REFERENCES vocabulary(id)
 );
 
 CREATE TABLE chat (
@@ -31,7 +32,7 @@ CREATE TABLE chat (
   title TEXT NOT NULL
 );
 
-CREATE TABLE word_base (
+CREATE TABLE vocabulary (
   id SERIAL PRIMARY KEY,
   owner_id BIGINT REFERENCES app_user(user_id),
   name TEXT NOT NULL
@@ -39,14 +40,14 @@ CREATE TABLE word_base (
 
 CREATE TABLE word (
   id SERIAL PRIMARY KEY,
-  base_id INTEGER REFERENCES word_base(id),
+  vocabulary_id INTEGER REFERENCES vocabulary(id),
   front TEXT NOT NULL,
   back TEXT NOT NULL
 );
 
 CREATE TABLE exercise_state (
   id SERIAL PRIMARY KEY,
-  base_id INTEGER REFERENCES word_base(id),
+  vocabulary_id INTEGER REFERENCES vocabulary(id),
   user_id BIGINT REFERENCES app_user(user_id),
   position INTEGER DEFAULT 0,
   multiplier REAL DEFAULT 1.5

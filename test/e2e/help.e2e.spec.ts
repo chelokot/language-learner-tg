@@ -9,7 +9,7 @@ function createBot(apiRoot: string) {
   const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
-    ctx.text = (key: string) => ctx.reply(key === 'help' ? 'Use /menu to manage word bases and start exercises' : key);
+    ctx.text = (key: string) => ctx.reply(key === 'help' ? 'Use /menu to manage vocabularies and start exercises' : key);
     ctx.db = { query: async () => ({ rows: [] }) } as any;
     ctx.dbEntities = {
       user: { user_id: ctx.from.id, name: 'Test' },
@@ -46,7 +46,7 @@ describe('help command e2e', () => {
     const updates = await client.getUpdates();
     const msg = updates.result[0].message;
     logger.logBot(msg.text!);
-    expect(msg.text).toBe('Use /menu to manage word bases and start exercises');
+    expect(msg.text).toBe('Use /menu to manage vocabularies and start exercises');
     generatePdf(logger.getEvents(), 'test/e2e/reports/help.pdf');
   });
 });

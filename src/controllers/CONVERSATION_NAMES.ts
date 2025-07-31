@@ -1,6 +1,6 @@
 export const CONVERSATION_NAMES = {
-  createBase: 'createBaseConversation',
-  renameBase: 'renameBaseConversation',
+  createVocabulary: 'createVocabularyConversation',
+  renameVocabulary: 'renameVocabularyConversation',
   addWord: 'addWordConversation',
   exercise: 'exerciseConversation',
 } as const;
