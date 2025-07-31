@@ -3,6 +3,7 @@ import TelegramServer from 'telegram-test-api';
 import { Bot } from 'grammy';
 import { helpController } from '../../src/controllers/help.js';
 import type { CustomContext } from '../../src/types/context.js';
+import { ChatLogger, generatePdf } from '../helpers/chat-logger.js';
 
 function createBot(apiRoot: string) {
   const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
@@ -23,6 +24,7 @@ function createBot(apiRoot: string) {
 describe('help command e2e', () => {
   let server: TelegramServer;
   let bot: Bot<CustomContext>;
+  const logger = new ChatLogger();
 
   beforeEach(async () => {
     server = new TelegramServer({ port: 9999 });
@@ -39,8 +41,12 @@ describe('help command e2e', () => {
   it('responds with help text', async () => {
     const client = server.getClient('test-token');
     await client.sendCommand(client.makeCommand('/help'));
+    logger.logUser('/help');
     await server.waitBotMessage();
     const updates = await client.getUpdates();
-    expect(updates.result[0].message.text).toBe('Use /menu to manage word bases and start exercises');
+    const msg = updates.result[0].message;
+    logger.logBot(msg.text!);
+    expect(msg.text).toBe('Use /menu to manage word bases and start exercises');
+    generatePdf(logger.getEvents(), 'test/e2e/reports/help.pdf');
   });
 });
