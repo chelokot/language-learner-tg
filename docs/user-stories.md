@@ -12,3 +12,6 @@ As a new user I want to create my own word base so that I can train translations
 6. I answer a few correctly and a few incorrectly and receive feedback each time.
 
 This scenario is covered by end‑to‑end tests under `test/e2e`.
+Each run captures the entire chat transcript and saves a Telegram‑style PDF in
+`test/e2e/reports`. The CI workflow uploads each PDF as its own artifact so it can be
+downloaded directly from GitHub Actions.

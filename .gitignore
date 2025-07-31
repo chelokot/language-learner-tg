@@ -3,7 +3,10 @@ build
 
 # Built dependencies
 node_modules
+# Test outputs
+coverage
 
 # Sensitive data
 .env
 api/*.js
+test/e2e/reports

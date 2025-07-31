@@ -4,6 +4,8 @@ import { createBot } from '../../src/config/bot.js';
 import type { CustomContext } from '../../src/types/context.js';
 import type { Database } from '../../src/types/database.js';
 import { Bot } from 'grammy';
+import { ChatLogger, generatePdf } from '../helpers/chat-logger.js';
+import type { InlineKeyboardButton } from '@grammyjs/types';
 
 function createMemoryDb(): Database {
   let baseId = 1;
@@ -50,6 +52,7 @@ function createMemoryDb(): Database {
 describe('basic user story e2e', () => {
   let server: TelegramServer;
   let bot: Bot<CustomContext>;
+  const logger = new ChatLogger();
 
   beforeEach(async () => {
     server = new TelegramServer({ port: 9998 });
@@ -69,33 +72,60 @@ describe('basic user story e2e', () => {
     const client = server.getClient('test-token');
 
     await client.sendCommand(client.makeCommand('/menu'));
+    logger.logUser('/menu');
     await server.waitBotMessage();
     let updates = await client.getUpdates();
-    const menuMsgId = updates.result[0].message.message_id;
+    const menuUpdate = updates.result[0].message;
+    logger.logBot(
+      menuUpdate.text!,
+      menuUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
+    );
+    const menuMsgId = menuUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('create_base', { message: { message_id: menuMsgId } }));
+    logger.logUser('tap Create base');
     await server.waitBotMessage();
     await client.getUpdates();
     await client.sendMessage(client.makeMessage('My base'));
+    logger.logUser('My base');
     await server.waitBotMessage();
     updates = await client.getUpdates();
-    const newMenuMsgId = updates.result.at(-1)!.message.message_id;
+    const createUpdate = updates.result.at(-1)!.message;
+    logger.logBot(
+      createUpdate.text!,
+      createUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
+    );
+    const newMenuMsgId = createUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('open_base:1', { message: { message_id: newMenuMsgId } }));
+    logger.logUser('open base');
     await server.waitBotMessage();
     updates = await client.getUpdates();
-    const baseMsgId = updates.result.at(-1)!.message.message_id;
+    const baseUpdate = updates.result.at(-1)!.message;
+    logger.logBot(
+      baseUpdate.text!,
+      baseUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
+    );
+    const baseMsgId = baseUpdate.message_id;
 
     async function addWord(front: string, back: string) {
       await client.sendCallback(client.makeCallbackQuery(`add_word:1`, { message: { message_id: baseMsgId } }));
+      logger.logUser('add word');
       await server.waitBotMessage();
       await client.getUpdates();
       await client.sendMessage(client.makeMessage(front));
+      logger.logUser(front);
       await server.waitBotMessage();
       await client.getUpdates();
       await client.sendMessage(client.makeMessage(back));
+      logger.logUser(back);
       await server.waitBotMessage();
-      await client.getUpdates();
+      const res = await client.getUpdates();
+      const msg = res.result.at(-1)!.message;
+      logger.logBot(
+        msg.text!,
+        msg.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
+      );
     }
 
     await addWord('hello', 'hola');
@@ -103,12 +133,19 @@ describe('basic user story e2e', () => {
 
     async function exercise(answer: string) {
       await client.sendCallback(client.makeCallbackQuery(`exercise:1`, { message: { message_id: baseMsgId } }));
+      logger.logUser('start exercise');
       await server.waitBotMessage();
       await client.getUpdates();
       await client.sendMessage(client.makeMessage(answer));
+      logger.logUser(answer);
       await server.waitBotMessage();
       const res = await client.getUpdates();
-      return res.result.at(-1)!.message.text;
+      const msg = res.result.at(-1)!.message;
+      logger.logBot(
+        msg.text!,
+        msg.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text),
+      );
+      return msg.text!;
     }
 
     const okText = await exercise('hola');
@@ -116,5 +153,7 @@ describe('basic user story e2e', () => {
 
     expect(okText).toBe('Correct');
     expect(failText.startsWith('Incorrect')).toBe(true);
+
+    generatePdf(logger.getEvents(), 'test/e2e/reports/user-story.pdf');
   });
 });
