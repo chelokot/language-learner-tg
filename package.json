@@ -14,7 +14,9 @@
     "start": "npm run compile && node .",
     "lint": "npx biome check src/ --write",
     "format": "npx biome format src/ --write",
-    "test": "vitest run"
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run --coverage --exclude \"test/e2e/**\"",
+    "test:e2e": "vitest run test/e2e --coverage"
   },
   "keywords": [
     "telegram",
@@ -42,6 +44,7 @@
     "@types/pg": "^8.11.2",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-functional": "^6.6.1",

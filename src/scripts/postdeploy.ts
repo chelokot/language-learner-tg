@@ -1,6 +1,6 @@
+import { fileURLToPath } from 'node:url';
 import { connectToDb } from '../config/database.js';
 import { applySchema, registerWebhook } from './deploy.js';
-import { fileURLToPath } from 'node:url';
 
 async function main() {
   const db = await connectToDb();

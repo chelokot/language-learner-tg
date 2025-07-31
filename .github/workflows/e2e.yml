@@ -1,0 +1,20 @@
+name: E2E
+
+on:
+  push:
+    branches: [main, work]
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: ['1/1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run test:e2e -- --shard=${{ matrix.shard }}
