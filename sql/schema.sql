@@ -40,3 +40,9 @@ CREATE TABLE IF NOT EXISTS score (
   next_slot INTEGER DEFAULT 0,
   PRIMARY KEY(state_id, word_id)
 );
+
+ALTER TABLE word
+  RENAME COLUMN IF EXISTS base_id TO vocabulary_id;
+
+ALTER TABLE exercise_state
+  RENAME COLUMN IF EXISTS base_id TO vocabulary_id;
