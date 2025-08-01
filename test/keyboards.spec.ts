@@ -1,21 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { kbBase } from '../src/ui/keyboards.js';
+import { kbVocabulary } from '../src/ui/keyboards.js';
+import type { InlineKeyboardButton } from '@grammyjs/types';
 
-describe('kbBase', () => {
+describe('kbVocabulary', () => {
   it('uses callback data with id', () => {
-    const kb = kbBase(42);
-    const rows = kb.inline_keyboard.map(row =>
+    const kb = kbVocabulary(42);
+    const rows = kb.inline_keyboard.map((row: InlineKeyboardButton[]) =>
       row.map(b => ({
         text: b.text,
-        data: (b as any).callback_data,
+        data: (b as InlineKeyboardButton.CallbackButton).callback_data,
       })),
     );
     expect(rows).toEqual([
       [{ text: 'Add word', data: 'add_word:42' }],
-      [{ text: 'Rename base', data: 'rename_base:42' }],
-      [{ text: 'Delete base', data: 'delete_base:42' }],
-      [{ text: 'Exercise', data: 'exercise:42' }],
-      [{ text: 'Back', data: 'back_to_bases' }],
+      [{ text: 'Rename', data: 'rename_vocab:42' }],
+      [{ text: 'Delete', data: 'delete_vocab:42' }],
+      [{ text: 'Select', data: 'select_vocab:42' }],
+      [{ text: 'Back', data: 'back_to_vocabularies' }],
     ]);
   });
 });
