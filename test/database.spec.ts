@@ -8,7 +8,7 @@ describe('connectToDb', () => {
   });
 
   it('throws when DATABASE_URL is missing', async () => {
-    delete process.env.DATABASE_URL;
+    delete (process.env as any).DATABASE_URL;
     await expect(connectToDb()).rejects.toThrow('DATABASE_URL is not set');
   });
 });
