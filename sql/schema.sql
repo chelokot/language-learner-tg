@@ -4,6 +4,9 @@ CREATE TABLE IF NOT EXISTS app_user (
   current_vocab_id INTEGER REFERENCES vocabulary(id)
 );
 
+ALTER TABLE app_user
+  ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id);
+
 CREATE TABLE IF NOT EXISTS chat (
   chat_id BIGINT PRIMARY KEY,
   title TEXT NOT NULL

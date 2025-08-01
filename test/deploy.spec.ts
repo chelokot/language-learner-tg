@@ -14,6 +14,16 @@ describe('applySchema', () => {
     await applySchema(db);
     expect(executed.length).toBe(schemaStatements);
   });
+
+  it('adds current_vocab_id column if missing', async () => {
+    const executed: string[] = [];
+    const db = { query: async (sql: string) => { executed.push(sql); } } as any;
+    await applySchema(db);
+    const normalized = executed.map(s => s.replace(/\s+/g, ' ').trim());
+    expect(normalized).toContain(
+      'ALTER TABLE app_user ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id)',
+    );
+  });
 });
 
 describe('registerWebhook', () => {
