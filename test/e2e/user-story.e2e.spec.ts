@@ -181,6 +181,7 @@ describe('basic user story e2e', () => {
     await client.sendMessage(client.makeMessage('/stop'));
     logger.logUser('/stop');
     await server.waitBotMessage();
+    await server.waitBotMessage();
     const res = await client.getUpdates();
     const last = res.result.at(-1)!.message!;
 

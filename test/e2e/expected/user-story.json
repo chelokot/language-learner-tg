@@ -38,11 +38,6 @@
   },
   {
     "role": "bot",
-    "text": "Send vocabulary name",
-    "buttons": []
-  },
-  {
-    "role": "bot",
     "text": "Created vocabulary My vocab",
     "buttons": []
   },
@@ -85,27 +80,12 @@
   },
   {
     "role": "bot",
-    "text": "Enter the word you are learning",
-    "buttons": []
-  },
-  {
-    "role": "bot",
     "text": "Enter the translation in your native language",
     "buttons": []
   },
   {
     "role": "user",
     "text": "hola"
-  },
-  {
-    "role": "bot",
-    "text": "Enter the word you are learning",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Enter the translation in your native language",
-    "buttons": []
   },
   {
     "role": "bot",
@@ -120,26 +100,6 @@
   {
     "role": "user",
     "text": "/stop"
-  },
-  {
-    "role": "bot",
-    "text": "Enter the word you are learning",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Enter the translation in your native language",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Word hello with translation hola added. Enter next word you are learning. /stop to finish adding new words",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Enter the word you are learning",
-    "buttons": []
   },
   {
     "role": "bot",
@@ -201,11 +161,6 @@
   },
   {
     "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
-  },
-  {
-    "role": "bot",
     "text": "Correct",
     "buttons": []
   },
@@ -220,21 +175,6 @@
   },
   {
     "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Correct",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
-  },
-  {
-    "role": "bot",
     "text": "Incorrect. Right answer: hola",
     "buttons": []
   },
@@ -246,31 +186,6 @@
   {
     "role": "user",
     "text": "/stop"
-  },
-  {
-    "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Correct",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Incorrect. Right answer: hola",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Translate: hello",
-    "buttons": []
   },
   {
     "role": "bot",

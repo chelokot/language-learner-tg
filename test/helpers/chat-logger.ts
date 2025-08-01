@@ -2,8 +2,11 @@ export type Event = { role: 'bot'; text: string; buttons?: string[] } | { role: 
 
 export class ChatLogger {
   private events: Event[] = [];
+  private seenIds = new Set<number>();
 
-  logBot(text: string, buttons?: string[]) {
+  logBot(text: string, buttons?: string[], id?: number) {
+    if (id && this.seenIds.has(id)) return;
+    if (id) this.seenIds.add(id);
     const last = this.events[this.events.length - 1];
     if (
       last &&
@@ -26,6 +29,7 @@ export class ChatLogger {
 
   clear() {
     this.events.length = 0;
+    this.seenIds.clear();
   }
 }
 
@@ -45,7 +49,7 @@ export function createLogTransformer(logger: ChatLogger): Transformer {
     const data = (res as any).result ?? res;
     if (method === 'sendMessage' && data.text) {
       const buttons = (data.reply_markup?.inline_keyboard ?? []).flat().map((b: any) => ('text' in b ? b.text : ''));
-      logger.logBot(data.text, buttons);
+      logger.logBot(data.text, buttons, data.message_id);
     }
     return res;
   };
@@ -53,18 +57,12 @@ export function createLogTransformer(logger: ChatLogger): Transformer {
 
 export function createLogMiddleware(logger: ChatLogger): MiddlewareFn<any> {
   return async (ctx, next) => {
-    const orig = ctx.reply;
-    ctx.reply = async (text: string, other?: any) => {
-      const buttons = (other?.reply_markup?.inline_keyboard ?? []).flat().map((b: any) => ('text' in b ? b.text : ''));
-      logger.logBot(text, buttons);
-      return orig.call(ctx, text, other);
-    };
+    ctx.api.config.use(createLogTransformer(logger));
     await next();
   };
 }
 
 export function attachLogger(bot: Bot, logger: ChatLogger) {
-  bot.api.config.use(createLogTransformer(logger));
   bot.use(createLogMiddleware(logger));
 }
 
