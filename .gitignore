@@ -10,3 +10,4 @@ coverage
 .env
 api/*.js
 test/e2e/reports
+reports/mutation
