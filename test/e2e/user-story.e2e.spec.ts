@@ -8,7 +8,8 @@ import {
   ChatLogger,
   generatePdf,
   saveJson,
-  createLogTransformer,
+  createLogMiddleware,
+  hasConsecutiveUserMessages,
 } from '../helpers/chat-logger.js';
 import fs from 'fs';
 
@@ -57,7 +58,11 @@ function createMemoryDb(): Database {
         words.push(word);
         return { rows: [word] };
       }
-      if (sql.startsWith('SELECT id, vocabulary_id, front, back FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1')) {
+      if (
+        sql.startsWith(
+          'SELECT id, vocabulary_id, front, back FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1',
+        )
+      ) {
         const w = words.find(word => word.vocabulary_id === params[0]);
         return { rows: w ? [w] : [] };
       }
@@ -77,7 +82,7 @@ describe('basic user story e2e', () => {
     process.env.TOKEN = 'test-token';
     process.env.TELEGRAM_API_ROOT = server.config.apiURL;
     bot = createBot(createMemoryDb(), {
-      apiTransformers: [createLogTransformer(logger)],
+      preMiddlewares: [createLogMiddleware(logger)],
     });
     bot.start();
   });
@@ -140,7 +145,9 @@ describe('basic user story e2e', () => {
     updates = await client.getUpdates();
     const afterAddUpdate = updates.result.at(-1)!.message!;
 
-    await client.sendCallback(client.makeCallbackQuery('select_vocab:1', { message: { message_id: afterAddUpdate.message_id } }));
+    await client.sendCallback(
+      client.makeCallbackQuery('select_vocab:1', { message: { message_id: afterAddUpdate.message_id } }),
+    );
     logger.logUser('tap Select');
     await server.waitBotMessage();
     updates = await client.getUpdates();
@@ -180,9 +187,8 @@ describe('basic user story e2e', () => {
     const events = logger.getEvents();
     generatePdf(events, 'test/e2e/reports/user-story.pdf');
     saveJson(events, 'test/e2e/reports/user-story.json');
-    const expected = JSON.parse(
-      fs.readFileSync('test/e2e/expected/user-story.json', 'utf8'),
-    );
+    const expected = JSON.parse(fs.readFileSync('test/e2e/expected/user-story.json', 'utf8'));
+    expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
   }, 15000);
 });

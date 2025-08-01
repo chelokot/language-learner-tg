@@ -31,16 +31,11 @@ function setupControllers(bot: Bot) {
   setupMenu(bot);
 }
 
-export function createBot(
-  database: Database,
-  options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] },
-) {
+export function createBot(database: Database, options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] }) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {
-    client: process.env.TELEGRAM_API_ROOT
-      ? { apiRoot: process.env.TELEGRAM_API_ROOT }
-      : undefined,
+    client: process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : undefined,
   });
   if (options?.apiTransformers) {
     bot.api.config.use(...options.apiTransformers);
@@ -58,7 +53,9 @@ export function createBot(
   }
   bot.use(
     conversations({
-      plugins: [extendContextMiddleware],
+      plugins: options?.preMiddlewares
+        ? [extendContextMiddleware, ...options.preMiddlewares]
+        : [extendContextMiddleware],
     }),
   );
 

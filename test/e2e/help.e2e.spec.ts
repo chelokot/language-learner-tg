@@ -7,7 +7,8 @@ import {
   ChatLogger,
   generatePdf,
   saveJson,
-  createLogTransformer,
+  createLogMiddleware,
+  hasConsecutiveUserMessages,
 } from '../helpers/chat-logger.js';
 import fs from 'fs';
 
@@ -15,7 +16,8 @@ function createBot(apiRoot: string, logger: ChatLogger) {
   const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
-    ctx.text = (key: string) => ctx.reply(key === 'help' ? 'Use /menu to manage vocabularies and start exercises' : key);
+    ctx.text = (key: string) =>
+      ctx.reply(key === 'help' ? 'Use /menu to manage vocabularies and start exercises' : key);
     ctx.db = { query: async () => ({ rows: [] }) } as any;
     ctx.dbEntities = {
       user: { user_id: ctx.from.id, name: 'Test' },
@@ -23,7 +25,7 @@ function createBot(apiRoot: string, logger: ChatLogger) {
     };
     await next();
   });
-  bot.api.config.use(createLogTransformer(logger));
+  bot.use(createLogMiddleware(logger));
   bot.use(helpController);
   return bot;
 }
@@ -56,9 +58,8 @@ describe('help command e2e', () => {
     const events = logger.getEvents();
     generatePdf(events, 'test/e2e/reports/help.pdf');
     saveJson(events, 'test/e2e/reports/help.json');
-    const expected = JSON.parse(
-      fs.readFileSync('test/e2e/expected/help.json', 'utf8'),
-    );
+    const expected = JSON.parse(fs.readFileSync('test/e2e/expected/help.json', 'utf8'));
+    expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
   });
 });
