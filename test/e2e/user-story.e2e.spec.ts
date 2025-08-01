@@ -4,8 +4,7 @@ import { createBot } from '../../src/config/bot.js';
 import type { CustomContext } from '../../src/types/context.js';
 import type { Database } from '../../src/types/database.js';
 import { Bot } from 'grammy';
-import { ChatLogger, generatePdf } from '../helpers/chat-logger.js';
-import type { InlineKeyboardButton } from '@grammyjs/types';
+import { ChatLogger, generatePdf, attachLogger } from '../helpers/chat-logger.js';
 
 function createMemoryDb(): Database {
   let vocabId = 1;
@@ -72,6 +71,7 @@ describe('basic user story e2e', () => {
     process.env.TOKEN = 'test-token';
     process.env.TELEGRAM_API_ROOT = server.config.apiURL;
     bot = createBot(createMemoryDb());
+    attachLogger(bot, logger);
     bot.start();
   });
 
@@ -88,19 +88,17 @@ describe('basic user story e2e', () => {
     await server.waitBotMessage();
     let updates = await client.getUpdates();
     const menuUpdate = updates.result[0].message!;
-    logger.logBot(menuUpdate.text!, menuUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
     const menuMsgId = menuUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('vocabularies', { message: { message_id: menuMsgId } }));
-    logger.logUser('tap vocabularies');
+    logger.logUser('tap Vocabularies');
     await server.waitBotMessage();
     updates = await client.getUpdates();
     const listUpdate = updates.result.at(-1)!.message!;
-    logger.logBot(listUpdate.text!, listUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
     const listMsgId = listUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('create_vocab', { message: { message_id: listMsgId } }));
-    logger.logUser('tap create');
+    logger.logUser('tap Create vocabulary');
     await server.waitBotMessage();
     await client.getUpdates();
     await client.sendMessage(client.makeMessage('My vocab'));
@@ -108,19 +106,17 @@ describe('basic user story e2e', () => {
     await server.waitBotMessage();
     updates = await client.getUpdates();
     const createUpdate = updates.result.at(-1)!.message!;
-    logger.logBot(createUpdate.text!, createUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
     const vocabListMsgId = createUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('open_vocab:1', { message: { message_id: vocabListMsgId } }));
-    logger.logUser('open vocab');
+    logger.logUser('tap My vocab');
     await server.waitBotMessage();
     updates = await client.getUpdates();
     const vocabUpdate = updates.result.at(-1)!.message!;
-    logger.logBot(vocabUpdate.text!, vocabUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
     const vocabMsgId = vocabUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('add_word:1', { message: { message_id: vocabMsgId } }));
-    logger.logUser('add word');
+    logger.logUser('tap Add word');
     await server.waitBotMessage();
     await client.getUpdates();
     await client.sendMessage(client.makeMessage('hello'));
@@ -136,10 +132,9 @@ describe('basic user story e2e', () => {
     await server.waitBotMessage();
     updates = await client.getUpdates();
     const afterAddUpdate = updates.result.at(-1)!.message!;
-    logger.logBot(afterAddUpdate.text!, afterAddUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
 
     await client.sendCallback(client.makeCallbackQuery('select_vocab:1', { message: { message_id: afterAddUpdate.message_id } }));
-    logger.logUser('select vocab');
+    logger.logUser('tap Select');
     await server.waitBotMessage();
     updates = await client.getUpdates();
 
@@ -151,15 +146,14 @@ describe('basic user story e2e', () => {
     const menu2MsgId = menu2.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('exercises', { message: { message_id: menu2MsgId } }));
-    logger.logUser('exercises');
+    logger.logUser('tap Exercises');
     await server.waitBotMessage();
     updates = await client.getUpdates();
     const exUpdate = updates.result.at(-1)!.message!;
-    logger.logBot(exUpdate.text!, exUpdate.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
     const exMsgId = exUpdate.message_id;
 
     await client.sendCallback(client.makeCallbackQuery('exercise_word', { message: { message_id: exMsgId } }));
-    logger.logUser('start exercise');
+    logger.logUser('tap Word translation');
     await server.waitBotMessage();
     await client.getUpdates();
     await client.sendMessage(client.makeMessage('hola'));
@@ -175,7 +169,6 @@ describe('basic user story e2e', () => {
     await server.waitBotMessage();
     const res = await client.getUpdates();
     const last = res.result.at(-1)!.message!;
-    logger.logBot(last.text!, last.reply_markup?.inline_keyboard?.flat().map((b: InlineKeyboardButton) => b.text));
 
     generatePdf(logger.getEvents(), 'test/e2e/reports/user-story.pdf');
   }, 15000);

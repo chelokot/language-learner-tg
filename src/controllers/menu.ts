@@ -116,7 +116,7 @@ export async function addWordConversation(
       `Word ${front} with translation ${back} added. Enter next word you are learning. /stop to finish adding new words`,
     );
   }
-  await showVocabulary(ctx, vocabularyId);
+  await showMenu(ctx);
 }
 
 export async function exerciseConversation(
@@ -144,6 +144,7 @@ export async function exerciseConversation(
     const ok = checkTranslation(word.back, answer);
     await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.back}`);
   }
+  await showMenu(ctx);
 }
 
 export function setupMenu(bot: any) {

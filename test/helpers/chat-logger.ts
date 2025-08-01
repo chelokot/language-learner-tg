@@ -20,6 +20,23 @@ export class ChatLogger {
   }
 }
 
+import type { Bot } from 'grammy';
+
+export function attachLogger(bot: Bot, logger: ChatLogger) {
+  bot.api.config.use(async (prev, method, payload, signal) => {
+    const result = await prev(method, payload, signal);
+    if (method === 'sendMessage' && (result as any).text) {
+      const buttons = (
+        (result as any).reply_markup?.inline_keyboard ?? []
+      )
+        .flat()
+        .map((b: any) => ('text' in b ? b.text : ''));
+      logger.logBot((result as any).text, buttons);
+    }
+    return result;
+  });
+}
+
 import fs from 'fs';
 import path from 'path';
 import PDFDocument from 'pdfkit';
@@ -47,9 +64,20 @@ export function generatePdf(events: Event[], file: string) {
       bubbleHeight += ev.buttons.length * (padding * 1.5 + textHeight / 2) + padding;
     }
 
-    doc.roundedRect(x, y, bubbleWidth, bubbleHeight, 6).fillAndStroke(isBot ? '#e6e6e6' : '#cde4ff', '#c0c0c0');
-    doc.fillColor('#000');
+    doc.roundedRect(x, y, bubbleWidth, bubbleHeight, 6).fillAndStroke(
+      isBot ? '#e6e6e6' : '#cde4ff',
+      '#c0c0c0',
+    );
+    if (!isBot && ev.text.startsWith('tap ')) {
+      doc.fillColor('#0066cc');
+      doc.font('Helvetica-Oblique');
+    } else {
+      doc.fillColor('#000');
+      doc.font('Helvetica');
+    }
     doc.text(ev.text, x + padding, y + padding, { width: textWidth });
+    doc.font('Helvetica');
+    doc.fillColor('#000');
 
     let curY = y + padding + textHeight + padding / 2;
 
