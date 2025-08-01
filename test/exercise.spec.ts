@@ -9,4 +9,8 @@ describe('checkTranslation', () => {
   it('detects incorrect answer', () => {
     expect(checkTranslation('World', 'planet')).toBe(false);
   });
+
+  it('trims correct answer string', () => {
+    expect(checkTranslation('  Hello  ', 'hello')).toBe(true);
+  });
 });
