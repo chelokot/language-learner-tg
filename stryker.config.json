@@ -9,7 +9,7 @@
     "!src/**/*.d.ts",
     "!src/**/__mocks__/*.ts"
   ],
-  "reporters": ["html", "cleartext", "progress"],
+  "reporters": ["html", "clear-text", "progress"],
   "timeoutMS": 5000,
   "thresholds": { "high": 80, "low": 60, "break": 70 }
 }
