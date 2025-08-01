@@ -1,0 +1,11 @@
+[
+  {
+    "role": "user",
+    "text": "/help"
+  },
+  {
+    "role": "bot",
+    "text": "Use /menu to manage vocabularies and start exercises",
+    "buttons": []
+  }
+]

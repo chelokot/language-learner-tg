@@ -1,119 +1,155 @@
 import { createConversation } from '@grammyjs/conversations';
 import type { Conversation } from '@grammyjs/conversations';
-import { Composer, InlineKeyboard } from 'grammy';
+import { Composer } from 'grammy';
 import { waitText } from '../helpers/wait-text.js';
 import { checkTranslation } from '../services/exercise.js';
-import { createWordBase, deleteWordBase, listWordBases, renameWordBase } from '../services/word-base.js';
+import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
+import {
+  createVocabulary,
+  deleteVocabulary,
+  getVocabulary,
+  listVocabularies,
+  renameVocabulary,
+} from '../services/vocabulary.js';
 import { addWord, getRandomWord } from '../services/word.js';
 import type { CustomContext } from '../types/context.js';
-import { kbBase, kbBases } from '../ui/keyboards.js';
+import { kbExercises, kbMenu, kbVocabularies, kbVocabulary } from '../ui/keyboards.js';
 import { CONVERSATION_NAMES } from './CONVERSATION_NAMES.js';
 
 export const menuController = new Composer<CustomContext>();
 
-async function showBases(ctx: CustomContext) {
-  const bases = await listWordBases({
-    db: ctx.db,
-    ownerId: ctx.dbEntities.user.user_id,
-  });
-  await ctx.reply('Word bases:', { reply_markup: kbBases(bases) });
+async function showMenu(ctx: CustomContext) {
+  await ctx.reply('Menu', { reply_markup: kbMenu() });
 }
 
-async function showBase(ctx: CustomContext, baseId: number) {
-  await ctx.reply(`Base ${baseId}`, { reply_markup: kbBase(baseId) });
+async function showVocabularies(ctx: CustomContext) {
+  const vocabs = await listVocabularies({ db: ctx.db, ownerId: ctx.dbEntities.user.user_id });
+  const currentId = ctx.dbEntities.user.current_vocab_id;
+  await ctx.reply(
+    `Vocabularies${currentId ? `\nCurrent: ${vocabs.find(v => v.id === currentId)?.name ?? 'none'}` : ''}`,
+    {
+      reply_markup: kbVocabularies(vocabs),
+    },
+  );
 }
 
-menuController.command('menu', showBases);
-menuController.callbackQuery('back_to_bases', showBases);
-menuController.callbackQuery(/open_base:(\d+)/, ctx => showBase(ctx, Number(ctx.match[1])));
-menuController.callbackQuery('create_base', ctx => ctx.conversation.enter(CONVERSATION_NAMES.createBase));
+async function showVocabulary(ctx: CustomContext, id: number) {
+  const vocab = await getVocabulary({ db: ctx.db, vocabularyId: id });
+  if (!vocab) return;
+  await ctx.reply(`Vocabulary ${vocab.name}`, { reply_markup: kbVocabulary(id) });
+}
+
+async function showExercises(ctx: CustomContext) {
+  await ctx.reply('Choose exercise', { reply_markup: kbExercises() });
+}
+
+menuController.command('menu', showMenu);
+menuController.callbackQuery('menu', showMenu);
+menuController.callbackQuery('vocabularies', showVocabularies);
+menuController.callbackQuery('exercises', showExercises);
+menuController.callbackQuery('back_to_vocabularies', showVocabularies);
+menuController.callbackQuery(/open_vocab:(\d+)/, ctx => showVocabulary(ctx, Number(ctx.match[1])));
+menuController.callbackQuery('create_vocab', ctx => ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary));
 menuController.callbackQuery(/add_word:(\d+)/, ctx =>
   ctx.conversation.enter(CONVERSATION_NAMES.addWord, Number(ctx.match[1])),
 );
-menuController.callbackQuery(/rename_base:(\d+)/, ctx =>
-  ctx.conversation.enter(CONVERSATION_NAMES.renameBase, Number(ctx.match[1])),
+menuController.callbackQuery(/rename_vocab:(\d+)/, ctx =>
+  ctx.conversation.enter(CONVERSATION_NAMES.renameVocabulary, Number(ctx.match[1])),
 );
-menuController.callbackQuery(/delete_base:(\d+)/, async ctx => {
-  await deleteWordBase({
-    db: ctx.db,
-    baseId: Number(ctx.match[1]),
-    ownerId: ctx.dbEntities.user.user_id,
-  });
+menuController.callbackQuery(/delete_vocab:(\d+)/, async ctx => {
+  await deleteVocabulary({ db: ctx.db, vocabularyId: Number(ctx.match[1]), ownerId: ctx.dbEntities.user.user_id });
   await ctx.answerCallbackQuery();
-  await showBases(ctx);
+  await showVocabularies(ctx);
 });
-menuController.callbackQuery(/exercise:(\d+)/, ctx =>
-  ctx.conversation.enter(CONVERSATION_NAMES.exercise, Number(ctx.match[1])),
-);
+menuController.callbackQuery(/select_vocab:(\d+)/, async ctx => {
+  await setCurrentVocabulary({ db: ctx.db, userId: ctx.dbEntities.user.user_id, vocabularyId: Number(ctx.match[1]) });
+  ctx.dbEntities.user.current_vocab_id = Number(ctx.match[1]);
+  await ctx.answerCallbackQuery('Selected');
+  await showVocabularies(ctx);
+});
+menuController.callbackQuery('exercise_word', ctx => ctx.conversation.enter(CONVERSATION_NAMES.exercise));
 
-export async function createBaseConversation(
+export async function createVocabularyConversation(
   conversation: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
 ) {
-  await ctx.reply('Send base name');
+  await ctx.reply('Send vocabulary name');
   const name = await waitText(conversation);
 
-  const base = await createWordBase({
-    db: ctx.db,
-    ownerId: ctx.dbEntities.user.user_id,
-    name,
-  });
-  await ctx.reply(`Created base ${base.name}`);
-  await showBases(ctx);
+  const vocab = await createVocabulary({ db: ctx.db, ownerId: ctx.dbEntities.user.user_id, name });
+  await ctx.reply(`Created vocabulary ${vocab.name}`);
+  await showVocabularies(ctx);
 }
 
-export async function renameBaseConversation(
+export async function renameVocabularyConversation(
   conversation: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
-  baseId: number,
+  vocabularyId: number,
 ) {
-  await ctx.reply('Send new base name');
+  await ctx.reply('Send new vocabulary name');
   const name = await waitText(conversation);
 
-  const base = await renameWordBase({
+  const vocab = await renameVocabulary({
     db: ctx.db,
-    baseId,
+    vocabularyId,
     ownerId: ctx.dbEntities.user.user_id,
     name,
   });
-  await ctx.reply(`Renamed to ${base.name}`);
-  await showBase(ctx, baseId);
+  await ctx.reply(`Renamed to ${vocab.name}`);
+  await showVocabulary(ctx, vocabularyId);
 }
 
 export async function addWordConversation(
   conversation: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
-  baseId: number,
+  vocabularyId: number,
 ) {
-  await ctx.reply('Front text');
-  const front = await waitText(conversation);
-  await ctx.reply('Back text');
-  const back = await waitText(conversation);
-
-  await addWord({ db: ctx.db, baseId, front, back });
-  await ctx.reply('Word added');
-  await showBase(ctx, baseId);
+  while (true) {
+    await ctx.reply('Enter the word you are learning');
+    const front = await waitText(conversation);
+    if (front === '/stop') break;
+    await ctx.reply('Enter the translation in your native language');
+    const back = await waitText(conversation);
+    if (back === '/stop') break;
+    await addWord({ db: ctx.db, vocabularyId, front, back });
+    await ctx.reply(
+      `Word ${front} with translation ${back} added. Enter next word you are learning. /stop to finish adding new words`,
+    );
+  }
+  await showMenu(ctx);
 }
 
 export async function exerciseConversation(
   conversation: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
-  baseId: number,
 ) {
-  const word = await getRandomWord({ db: ctx.db, baseId });
-  if (!word) {
-    await ctx.reply('No words');
+  const vocabId = ctx.dbEntities.user.current_vocab_id;
+  if (!vocabId) {
+    await ctx.reply('Select a vocabulary first');
     return;
   }
-  await ctx.reply(`Translate: ${word.front}`);
-  const answer = await waitText(conversation);
-  const ok = checkTranslation(word.back, answer);
-  await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.back}`);
+
+  while (true) {
+    const word = await getRandomWord({ db: ctx.db, vocabularyId: vocabId });
+    if (!word) {
+      await ctx.reply('No words');
+      break;
+    }
+    await ctx.reply(`Translate: ${word.front}`);
+    const answer = await waitText(conversation);
+    if (answer === '/stop') {
+      await ctx.reply('Stopping exercise');
+      break;
+    }
+    const ok = checkTranslation(word.back, answer);
+    await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.back}`);
+  }
+  await showMenu(ctx);
 }
 
 export function setupMenu(bot: any) {
-  bot.use(createConversation(createBaseConversation));
-  bot.use(createConversation(renameBaseConversation));
+  bot.use(createConversation(createVocabularyConversation));
+  bot.use(createConversation(renameVocabularyConversation));
   bot.use(createConversation(addWordConversation));
   bot.use(createConversation(exerciseConversation));
   bot.use(menuController);

@@ -1,0 +1,203 @@
+[
+  {
+    "role": "user",
+    "text": "/menu"
+  },
+  {
+    "role": "bot",
+    "text": "Menu",
+    "buttons": [
+      "Vocabularies",
+      "Exercises"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Vocabularies"
+  },
+  {
+    "role": "bot",
+    "text": "Vocabularies",
+    "buttons": [
+      "Create vocabulary",
+      "Back"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Create vocabulary"
+  },
+  {
+    "role": "bot",
+    "text": "Send vocabulary name",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "My vocab"
+  },
+  {
+    "role": "bot",
+    "text": "Created vocabulary My vocab",
+    "buttons": []
+  },
+  {
+    "role": "bot",
+    "text": "Vocabularies",
+    "buttons": [
+      "My vocab",
+      "Create vocabulary",
+      "Back"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap My vocab"
+  },
+  {
+    "role": "bot",
+    "text": "Vocabulary My vocab",
+    "buttons": [
+      "Add word",
+      "Rename",
+      "Delete",
+      "Select",
+      "Back"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Add word"
+  },
+  {
+    "role": "bot",
+    "text": "Enter the word you are learning",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "hello"
+  },
+  {
+    "role": "bot",
+    "text": "Enter the translation in your native language",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "hola"
+  },
+  {
+    "role": "bot",
+    "text": "Word hello with translation hola added. Enter next word you are learning. /stop to finish adding new words",
+    "buttons": []
+  },
+  {
+    "role": "bot",
+    "text": "Enter the word you are learning",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "/stop"
+  },
+  {
+    "role": "bot",
+    "text": "Menu",
+    "buttons": [
+      "Vocabularies",
+      "Exercises"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Select"
+  },
+  {
+    "role": "bot",
+    "text": "Vocabularies\nCurrent: My vocab",
+    "buttons": [
+      "My vocab",
+      "Create vocabulary",
+      "Back"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "/menu"
+  },
+  {
+    "role": "bot",
+    "text": "Menu",
+    "buttons": [
+      "Vocabularies",
+      "Exercises"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Exercises"
+  },
+  {
+    "role": "bot",
+    "text": "Choose exercise",
+    "buttons": [
+      "Word translation",
+      "Back"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "tap Word translation"
+  },
+  {
+    "role": "bot",
+    "text": "Translate: hello",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "hola"
+  },
+  {
+    "role": "bot",
+    "text": "Correct",
+    "buttons": []
+  },
+  {
+    "role": "bot",
+    "text": "Translate: hello",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "wrong"
+  },
+  {
+    "role": "bot",
+    "text": "Incorrect. Right answer: hola",
+    "buttons": []
+  },
+  {
+    "role": "bot",
+    "text": "Translate: hello",
+    "buttons": []
+  },
+  {
+    "role": "user",
+    "text": "/stop"
+  },
+  {
+    "role": "bot",
+    "text": "Stopping exercise",
+    "buttons": []
+  },
+  {
+    "role": "bot",
+    "text": "Menu",
+    "buttons": [
+      "Vocabularies",
+      "Exercises"
+    ]
+  }
+]

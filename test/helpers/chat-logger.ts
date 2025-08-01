@@ -2,8 +2,20 @@ export type Event = { role: 'bot'; text: string; buttons?: string[] } | { role: 
 
 export class ChatLogger {
   private events: Event[] = [];
+  private seenIds = new Set<number>();
 
-  logBot(text: string, buttons?: string[]) {
+  logBot(text: string, buttons?: string[], id?: number) {
+    if (id && this.seenIds.has(id)) return;
+    if (id) this.seenIds.add(id);
+    const last = this.events[this.events.length - 1];
+    if (
+      last &&
+      last.role === 'bot' &&
+      last.text === text &&
+      JSON.stringify(last.buttons ?? []) === JSON.stringify(buttons ?? [])
+    ) {
+      return;
+    }
     this.events.push({ role: 'bot', text, buttons });
   }
 
@@ -17,7 +29,41 @@ export class ChatLogger {
 
   clear() {
     this.events.length = 0;
+    this.seenIds.clear();
   }
+}
+
+export function hasConsecutiveUserMessages(events: Event[]): boolean {
+  for (let i = 0; i < events.length - 1; i++) {
+    if (events[i].role === 'user' && events[i + 1].role === 'user') return true;
+  }
+  return false;
+}
+
+import type { Bot, MiddlewareFn } from 'grammy';
+import type { Transformer } from 'grammy/out/core/client.js';
+
+export function createLogTransformer(logger: ChatLogger): Transformer {
+  return async (prev, method, payload, signal) => {
+    const res = await prev(method, payload, signal);
+    const data = (res as any).result ?? res;
+    if (method === 'sendMessage' && data.text) {
+      const buttons = (data.reply_markup?.inline_keyboard ?? []).flat().map((b: any) => ('text' in b ? b.text : ''));
+      logger.logBot(data.text, buttons, data.message_id);
+    }
+    return res;
+  };
+}
+
+export function createLogMiddleware(logger: ChatLogger): MiddlewareFn<any> {
+  return async (ctx, next) => {
+    ctx.api.config.use(createLogTransformer(logger));
+    await next();
+  };
+}
+
+export function attachLogger(bot: Bot, logger: ChatLogger) {
+  bot.use(createLogMiddleware(logger));
 }
 
 import fs from 'fs';
@@ -48,8 +94,16 @@ export function generatePdf(events: Event[], file: string) {
     }
 
     doc.roundedRect(x, y, bubbleWidth, bubbleHeight, 6).fillAndStroke(isBot ? '#e6e6e6' : '#cde4ff', '#c0c0c0');
-    doc.fillColor('#000');
+    if (!isBot && ev.text.startsWith('tap ')) {
+      doc.fillColor('#0066cc');
+      doc.font('Helvetica-Oblique');
+    } else {
+      doc.fillColor('#000');
+      doc.font('Helvetica');
+    }
     doc.text(ev.text, x + padding, y + padding, { width: textWidth });
+    doc.font('Helvetica');
+    doc.fillColor('#000');
 
     let curY = y + padding + textHeight + padding / 2;
 
@@ -73,4 +127,9 @@ export function generatePdf(events: Event[], file: string) {
   }
 
   doc.end();
+}
+
+export function saveJson(events: Event[], file: string) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(events, null, 2));
 }
