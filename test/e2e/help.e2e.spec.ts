@@ -3,9 +3,15 @@ import TelegramServer from 'telegram-test-api';
 import { Bot } from 'grammy';
 import { helpController } from '../../src/controllers/help.js';
 import type { CustomContext } from '../../src/types/context.js';
-import { ChatLogger, generatePdf, attachLogger } from '../helpers/chat-logger.js';
+import {
+  ChatLogger,
+  generatePdf,
+  saveJson,
+  createLogTransformer,
+} from '../helpers/chat-logger.js';
+import fs from 'fs';
 
-function createBot(apiRoot: string) {
+function createBot(apiRoot: string, t: ReturnType<typeof createLogTransformer>) {
   const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
@@ -18,6 +24,7 @@ function createBot(apiRoot: string) {
     await next();
   });
   bot.use(helpController);
+  bot.api.config.use(t);
   return bot;
 }
 
@@ -29,8 +36,7 @@ describe('help command e2e', () => {
   beforeEach(async () => {
     server = new TelegramServer({ port: 9999 });
     await server.start();
-    bot = createBot(server.config.apiURL);
-    attachLogger(bot, logger);
+    bot = createBot(server.config.apiURL, createLogTransformer(logger));
     bot.start();
   });
 
@@ -47,6 +53,12 @@ describe('help command e2e', () => {
     const updates = await client.getUpdates();
     const msg = updates.result[0].message;
     expect(msg.text).toBe('Use /menu to manage vocabularies and start exercises');
-    generatePdf(logger.getEvents(), 'test/e2e/reports/help.pdf');
+    const events = logger.getEvents();
+    generatePdf(events, 'test/e2e/reports/help.pdf');
+    saveJson(events, 'test/e2e/reports/help.json');
+    const expected = JSON.parse(
+      fs.readFileSync('test/e2e/expected/help.json', 'utf8'),
+    );
+    expect(events).toEqual(expected);
   });
 });

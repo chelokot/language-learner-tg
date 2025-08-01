@@ -21,20 +21,24 @@ export class ChatLogger {
 }
 
 import type { Bot } from 'grammy';
+import type { Transformer } from 'grammy/out/core/client.js';
 
-export function attachLogger(bot: Bot, logger: ChatLogger) {
-  bot.api.config.use(async (prev, method, payload, signal) => {
-    const result = await prev(method, payload, signal);
-    if (method === 'sendMessage' && (result as any).text) {
-      const buttons = (
-        (result as any).reply_markup?.inline_keyboard ?? []
-      )
+export function createLogTransformer(logger: ChatLogger): Transformer {
+  return async (prev, method, payload, signal) => {
+    const res = await prev(method, payload, signal);
+    const data = (res as any).result ?? res;
+    if (method === 'sendMessage' && data.text) {
+      const buttons = (data.reply_markup?.inline_keyboard ?? [])
         .flat()
         .map((b: any) => ('text' in b ? b.text : ''));
-      logger.logBot((result as any).text, buttons);
+      logger.logBot(data.text, buttons);
     }
-    return result;
-  });
+    return res;
+  };
+}
+
+export function attachLogger(bot: Bot, logger: ChatLogger) {
+  bot.api.config.use(createLogTransformer(logger));
 }
 
 import fs from 'fs';
@@ -101,4 +105,9 @@ export function generatePdf(events: Event[], file: string) {
   }
 
   doc.end();
+}
+
+export function saveJson(events: Event[], file: string) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(events, null, 2));
 }

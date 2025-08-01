@@ -4,7 +4,13 @@ import { createBot } from '../../src/config/bot.js';
 import type { CustomContext } from '../../src/types/context.js';
 import type { Database } from '../../src/types/database.js';
 import { Bot } from 'grammy';
-import { ChatLogger, generatePdf, attachLogger } from '../helpers/chat-logger.js';
+import {
+  ChatLogger,
+  generatePdf,
+  saveJson,
+  createLogTransformer,
+} from '../helpers/chat-logger.js';
+import fs from 'fs';
 
 function createMemoryDb(): Database {
   let vocabId = 1;
@@ -70,8 +76,9 @@ describe('basic user story e2e', () => {
     await server.start();
     process.env.TOKEN = 'test-token';
     process.env.TELEGRAM_API_ROOT = server.config.apiURL;
-    bot = createBot(createMemoryDb());
-    attachLogger(bot, logger);
+    bot = createBot(createMemoryDb(), {
+      apiTransformers: [createLogTransformer(logger)],
+    });
     bot.start();
   });
 
@@ -170,6 +177,12 @@ describe('basic user story e2e', () => {
     const res = await client.getUpdates();
     const last = res.result.at(-1)!.message!;
 
-    generatePdf(logger.getEvents(), 'test/e2e/reports/user-story.pdf');
+    const events = logger.getEvents();
+    generatePdf(events, 'test/e2e/reports/user-story.pdf');
+    saveJson(events, 'test/e2e/reports/user-story.json');
+    const expected = JSON.parse(
+      fs.readFileSync('test/e2e/expected/user-story.json', 'utf8'),
+    );
+    expect(events).toEqual(expected);
   }, 15000);
 });
