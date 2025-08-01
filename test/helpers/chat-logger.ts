@@ -20,7 +20,7 @@ export class ChatLogger {
   }
 }
 
-import type { Bot } from 'grammy';
+import type { Bot, MiddlewareFn } from 'grammy';
 import type { Transformer } from 'grammy/out/core/client.js';
 
 export function createLogTransformer(logger: ChatLogger): Transformer {
@@ -37,8 +37,23 @@ export function createLogTransformer(logger: ChatLogger): Transformer {
   };
 }
 
+export function createLogMiddleware(logger: ChatLogger): MiddlewareFn<any> {
+  return async (ctx, next) => {
+    const orig = ctx.reply;
+    ctx.reply = async (text: string, other?: any) => {
+      const buttons = (other?.reply_markup?.inline_keyboard ?? [])
+        .flat()
+        .map((b: any) => ('text' in b ? b.text : ''));
+      logger.logBot(text, buttons);
+      return orig.call(ctx, text, other);
+    };
+    await next();
+  };
+}
+
 export function attachLogger(bot: Bot, logger: ChatLogger) {
   bot.api.config.use(createLogTransformer(logger));
+  bot.use(createLogMiddleware(logger));
 }
 
 import fs from 'fs';

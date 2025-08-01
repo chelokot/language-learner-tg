@@ -11,7 +11,7 @@ import {
 } from '../helpers/chat-logger.js';
 import fs from 'fs';
 
-function createBot(apiRoot: string, t: ReturnType<typeof createLogTransformer>) {
+function createBot(apiRoot: string, logger: ChatLogger) {
   const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
@@ -23,8 +23,8 @@ function createBot(apiRoot: string, t: ReturnType<typeof createLogTransformer>) 
     };
     await next();
   });
+  bot.api.config.use(createLogTransformer(logger));
   bot.use(helpController);
-  bot.api.config.use(t);
   return bot;
 }
 
@@ -36,7 +36,7 @@ describe('help command e2e', () => {
   beforeEach(async () => {
     server = new TelegramServer({ port: 9999 });
     await server.start();
-    bot = createBot(server.config.apiURL, createLogTransformer(logger));
+    bot = createBot(server.config.apiURL, logger);
     bot.start();
   });
 

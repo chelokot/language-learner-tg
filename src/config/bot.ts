@@ -33,7 +33,7 @@ function setupControllers(bot: Bot) {
 
 export function createBot(
   database: Database,
-  options?: { apiTransformers?: Transformer[] },
+  options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] },
 ) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
@@ -53,6 +53,9 @@ export function createBot(
 
   // Set up context extension both outside and inside conversations
   bot.use(extendContextMiddleware);
+  if (options?.preMiddlewares) {
+    for (const mw of options.preMiddlewares) bot.use(mw);
+  }
   bot.use(
     conversations({
       plugins: [extendContextMiddleware],
@@ -67,7 +70,7 @@ export function createBot(
 
 export async function startBot(
   database: Database,
-  options?: { apiTransformers?: Transformer[] },
+  options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] },
 ) {
   const bot = createBot(database, options);
 
