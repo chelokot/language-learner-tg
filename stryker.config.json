@@ -6,6 +6,7 @@
   },
   "mutate": [
     "src/**/*.ts",
+    "!src/**/*.d.ts",
     "!src/**/__mocks__/*.ts"
   ],
   "reporters": ["html", "cleartext", "progress"],
