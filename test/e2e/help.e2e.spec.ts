@@ -20,7 +20,7 @@ function createBot(apiRoot: string, logger: ChatLogger) {
       ctx.reply(key === 'help' ? 'Use /menu to manage vocabularies and start exercises' : key);
     ctx.db = { query: async () => ({ rows: [] }) } as any;
     ctx.dbEntities = {
-      user: { user_id: ctx.from.id, name: 'Test' },
+      user: { user_id: ctx.from.id, name: 'Test', current_vocab_id: null },
       chat: null,
     };
     await next();

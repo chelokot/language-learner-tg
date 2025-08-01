@@ -3,18 +3,18 @@ import type { Conversation } from '@grammyjs/conversations';
 import { Composer } from 'grammy';
 import { waitText } from '../helpers/wait-text.js';
 import { checkTranslation } from '../services/exercise.js';
+import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
 import {
   createVocabulary,
   deleteVocabulary,
-  renameVocabulary,
-  listVocabularies,
   getVocabulary,
+  listVocabularies,
+  renameVocabulary,
 } from '../services/vocabulary.js';
 import { addWord, getRandomWord } from '../services/word.js';
 import type { CustomContext } from '../types/context.js';
-import { kbMenu, kbVocabularies, kbVocabulary, kbExercises } from '../ui/keyboards.js';
+import { kbExercises, kbMenu, kbVocabularies, kbVocabulary } from '../ui/keyboards.js';
 import { CONVERSATION_NAMES } from './CONVERSATION_NAMES.js';
-import { setCurrentVocabulary, getCurrentVocabularyId } from '../services/user.js';
 
 export const menuController = new Composer<CustomContext>();
 
