@@ -41,20 +41,19 @@ CREATE TABLE IF NOT EXISTS score (
   PRIMARY KEY(state_id, word_id)
 );
 
-DO $$
+DO $do$
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-     WHERE table_name='word' AND column_name='base_id'
-  ) THEN
+  BEGIN
     ALTER TABLE word RENAME COLUMN base_id TO vocabulary_id;
-  END IF;
+  EXCEPTION WHEN undefined_column THEN  -- колонки уже нет — пропускаем
+    NULL;
+  END;
 
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-     WHERE table_name='exercise_state' AND column_name='base_id'
-  ) THEN
+  BEGIN
     ALTER TABLE exercise_state RENAME COLUMN base_id TO vocabulary_id;
-  END IF;
+  EXCEPTION WHEN undefined_column THEN
+    NULL;
+  END;
 END;
-$$;
+$do$;
+
