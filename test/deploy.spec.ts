@@ -24,6 +24,35 @@ describe('applySchema', () => {
       'ALTER TABLE app_user ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id)',
     );
   });
+
+  it('migrates legacy base_id columns', async () => {
+    const executed: string[] = [];
+    const db = { query: async (sql: string) => executed.push(sql) } as any;
+    await applySchema(db);
+    const norm = executed.map(s => s.replace(/\s+/g, ' ').trim());
+  
+    // word
+    expect(norm).toContain(
+      'ALTER TABLE word ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id)'
+    );
+    expect(norm).toContain(
+      'UPDATE word SET vocabulary_id = base_id WHERE base_id IS NOT NULL AND (vocabulary_id IS NULL OR vocabulary_id <> base_id)'
+    );
+    expect(norm).toContain(
+      'ALTER TABLE word DROP COLUMN IF EXISTS base_id'
+    );
+  
+    // exercise_state
+    expect(norm).toContain(
+      'ALTER TABLE exercise_state ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id)'
+    );
+    expect(norm).toContain(
+      'UPDATE exercise_state SET vocabulary_id = base_id WHERE base_id IS NOT NULL AND (vocabulary_id IS NULL OR vocabulary_id <> base_id)'
+    );
+    expect(norm).toContain(
+      'ALTER TABLE exercise_state DROP COLUMN IF EXISTS base_id'
+    );
+  });
 });
 
 describe('registerWebhook', () => {

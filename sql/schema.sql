@@ -4,9 +4,6 @@ CREATE TABLE IF NOT EXISTS app_user (
   current_vocab_id INTEGER REFERENCES vocabulary(id)
 );
 
-ALTER TABLE app_user
-  ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id);
-
 CREATE TABLE IF NOT EXISTS chat (
   chat_id BIGINT PRIMARY KEY,
   title TEXT NOT NULL
@@ -40,3 +37,31 @@ CREATE TABLE IF NOT EXISTS score (
   next_slot INTEGER DEFAULT 0,
   PRIMARY KEY(state_id, word_id)
 );
+
+
+-- Migrations
+ALTER TABLE app_user
+  ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id);
+-- === word ===============================================================
+ALTER TABLE word
+  ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id);
+
+UPDATE word
+SET    vocabulary_id = base_id
+WHERE  base_id IS NOT NULL
+  AND (vocabulary_id IS NULL OR vocabulary_id <> base_id);
+
+ALTER TABLE word
+  DROP COLUMN IF EXISTS base_id;
+
+-- === exercise_state =====================================================
+ALTER TABLE exercise_state
+  ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id);
+
+UPDATE exercise_state
+SET    vocabulary_id = base_id
+WHERE  base_id IS NOT NULL
+  AND (vocabulary_id IS NULL OR vocabulary_id <> base_id);
+
+ALTER TABLE exercise_state
+  DROP COLUMN IF EXISTS base_id;
