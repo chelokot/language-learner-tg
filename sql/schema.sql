@@ -41,8 +41,20 @@ CREATE TABLE IF NOT EXISTS score (
   PRIMARY KEY(state_id, word_id)
 );
 
-ALTER TABLE word
-  RENAME COLUMN IF EXISTS base_id TO vocabulary_id;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_name='word' AND column_name='base_id'
+  ) THEN
+    ALTER TABLE word RENAME COLUMN base_id TO vocabulary_id;
+  END IF;
 
-ALTER TABLE exercise_state
-  RENAME COLUMN IF EXISTS base_id TO vocabulary_id;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_name='exercise_state' AND column_name='base_id'
+  ) THEN
+    ALTER TABLE exercise_state RENAME COLUMN base_id TO vocabulary_id;
+  END IF;
+END
+$$;
