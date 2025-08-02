@@ -56,5 +56,5 @@ BEGIN
   ) THEN
     ALTER TABLE exercise_state RENAME COLUMN base_id TO vocabulary_id;
   END IF;
-END
+END;
 $$;
