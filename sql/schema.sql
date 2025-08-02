@@ -41,19 +41,21 @@ CREATE TABLE IF NOT EXISTS score (
   PRIMARY KEY(state_id, word_id)
 );
 
-DO $do$
+DO $$
 BEGIN
+  -- word
   BEGIN
     ALTER TABLE word RENAME COLUMN base_id TO vocabulary_id;
-  EXCEPTION WHEN undefined_column THEN  -- колонки уже нет — пропускаем
+  EXCEPTION WHEN undefined_column THEN
     NULL;
   END;
 
+  -- exercise_state
   BEGIN
     ALTER TABLE exercise_state RENAME COLUMN base_id TO vocabulary_id;
   EXCEPTION WHEN undefined_column THEN
     NULL;
   END;
 END;
-$do$;
+$$;
 
