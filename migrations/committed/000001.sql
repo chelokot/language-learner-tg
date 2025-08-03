@@ -1,3 +1,6 @@
+--! Previous: -
+--! Hash: sha1:e1ddf290fd7294500d216d56cee6c0ce83270212
+
 CREATE TABLE app_user (
   user_id BIGINT PRIMARY KEY,
   name TEXT NOT NULL
