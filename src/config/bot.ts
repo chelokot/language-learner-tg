@@ -6,7 +6,6 @@ import type { Transformer } from 'grammy/out/core/client.js';
 import { helpController } from '../controllers/help.js';
 import { setupMenu } from '../controllers/menu.js';
 import { startController } from '../controllers/start.js';
-import { stopController } from '../controllers/stop.js';
 import { resolvePath } from '../helpers/resolve-path.js';
 import type { CustomContext } from '../types/context.js';
 import type { Database } from '../types/database.js';
@@ -26,7 +25,6 @@ function setupMiddlewares(bot: Bot, localeEngine: I18n) {
 
 function setupControllers(bot: Bot) {
   bot.use(startController);
-  bot.use(stopController);
   bot.use(helpController);
   setupMenu(bot);
 }
