@@ -11,3 +11,5 @@ coverage
 api/*.js
 test/e2e/reports
 reports/mutation
+
+migrations/current.sql

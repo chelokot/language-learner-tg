@@ -11,7 +11,5 @@ Follow these steps to run the bot on Vercel.
    are deployed correctly and bundles the locale files from `src/locales`.
 5. Add the environment variable `TOKEN` with the token provided by BotFather.
    The HTTP function defined in `api/bot.ts` will handle Telegram updates.
-6. Deploy the project. The build step runs `npm run postdeploy` which
-   automatically creates the database schema from `sql/schema.sql` and
-   configures the Telegram webhook using `WEBHOOK_URL` or `VERCEL_URL`.
+6. Deploy the project. The build step runs `npm run postdeploy` which applies pending migrations using Graphile Migrate and configures the Telegram webhook using `WEBHOOK_URL` or `VERCEL_URL`.
 7. Start chatting with your bot.

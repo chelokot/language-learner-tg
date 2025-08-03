@@ -1,53 +1,47 @@
 import { describe, it, expect, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { applySchema, registerWebhook } from '../src/scripts/deploy.js';
+import { existsSync } from 'node:fs';
 
-const schemaStatements = readFileSync('sql/schema.sql', 'utf8')
-  .split(';')
-  .map(s => s.trim())
-  .filter(Boolean).length;
-
-describe('applySchema', () => {
-  it('runs each statement from schema file', async () => {
-    const executed: string[] = [];
-    const db = { query: async (sql: string) => { executed.push(sql); } } as any;
-    await applySchema(db);
-    expect(executed.length).toBe(schemaStatements);
+describe('project setup', () => {
+  it('includes graphile-migrate config', () => {
+    expect(existsSync('.gmrc')).toBe(true);
   });
+});
 
-  it('adds current_vocab_id column if missing', async () => {
-    const executed: string[] = [];
-    const db = { query: async (sql: string) => { executed.push(sql); } } as any;
-    await applySchema(db);
-    const normalized = executed.map(s => s.replace(/\s+/g, ' ').trim());
-    expect(normalized).toContain(
-      'ALTER TABLE app_user ADD COLUMN IF NOT EXISTS current_vocab_id INTEGER REFERENCES vocabulary(id)',
-    );
+describe('runMigrations', () => {
+  it('executes graphile-migrate CLI', async () => {
+    vi.mock('node:child_process', () => ({
+      execFile: vi.fn((_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
+        cb(null);
+      }),
+    }));
+    const { runMigrations } = await import('../src/scripts/deploy.js');
+    const { execFile } = await import('node:child_process');
+    await runMigrations();
+    expect(execFile).toHaveBeenCalledWith('graphile-migrate', ['migrate'], expect.any(Function));
   });
 });
 
 describe('registerWebhook', () => {
   it('calls Telegram API with proper URL', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    const { registerWebhook } = await import('../src/scripts/deploy.js');
     await registerWebhook('abc', 'https://example.com', fetchMock);
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://api.telegram.org/botabc/setWebhook?url=https://example.com/api/bot'
+      'https://api.telegram.org/botabc/setWebhook?url=https://example.com/api/bot',
     );
   });
 
   it('throws when Telegram returns ok=false', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: true, json: async () => ({ ok: false, description: 'bad' }) });
-    await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow(
-      'Webhook setup failed: bad'
-    );
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: false, description: 'bad' }) });
+    const { registerWebhook } = await import('../src/scripts/deploy.js');
+    await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow('Webhook setup failed: bad');
   });
 
   it('throws when response lacks ok field', async () => {
     const fetchMock = vi.fn().mockResolvedValue({});
+    const { registerWebhook } = await import('../src/scripts/deploy.js');
     await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow(
-      'Unexpected fetch implementation'
+      'Unexpected fetch implementation',
     );
   });
 });

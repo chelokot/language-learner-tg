@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "compile": "tsc",
-    "postcompile": "mkdir -p build/src && cp -r src/locales build/src && cp -r sql build && mkdir -p api && cp build/api/* api/",
+    "postcompile": "mkdir -p build/src && cp -r src/locales build/src && mkdir -p api && cp build/api/* api/",
     "postdeploy": "node build/src/scripts/postdeploy.js",
     "build": "npm run compile && npm run postdeploy",
     "bg:start": "npm run prepare && pm2 start build/index.js --name telegram-bot",
@@ -17,7 +17,10 @@
     "test": "tsc --noEmit && vitest run --coverage",
     "test:unit": "vitest run --coverage --exclude \"test/e2e/**\"",
     "test:e2e": "vitest run test/e2e --coverage",
-    "mutation": "stryker run"
+    "mutation": "stryker run",
+    "migrate": "graphile-migrate migrate",
+    "migration:commit": "graphile-migrate commit",
+    "test:migrations": "vitest run test/migrations.spec.ts"
   },
   "keywords": [
     "telegram",
@@ -63,7 +66,9 @@
     "prettier-eslint": "^16.3.0",
     "telegram-test-api": "^4.2.1",
     "typescript": "^5.5.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "graphile-migrate": "^1.4.1",
+    "pg-mem": "^3.0.0"
   },
   "type": "module",
   "engines": {
