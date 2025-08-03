@@ -11,6 +11,7 @@ This repository hosts a Telegram bot for spaced repetition based on serverless T
 * **CI**: GitHub workflow runs `npm ci` and `npm test`.
 * **Code style**: formatted with Biome (`npm run format`). Keep the codebase in ES modules and TypeScript. Node 20 or later.
 * **Docs**: maintain design documents in `docs/` describing architecture and database schema. Update README when public APIs or setup steps change.
+* **Migrations**: database schema changes MUST use Graphile Migrate. Never edit files in `migrations/committed`; create a new migration via `migrations/current.sql`, run `npm run migration:commit`, and validate with `npm run test:migrations` before committing.
 * **Conversation names**: You MUST use type-safe constants from `CONVERSATION_NAMES` for all conversation names (e.g. `ctx.conversation.enter(CONVERSATION_NAMES.createBase)`).  
   Never use string literals for conversation names. Similar goes to any type-unsafe strings.
   If you see any string literal used, you MUST immediately refactor it to use the constant.  
