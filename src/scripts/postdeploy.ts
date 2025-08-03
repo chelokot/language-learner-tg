@@ -1,10 +1,8 @@
 import { fileURLToPath } from 'node:url';
-import { connectToDb } from '../config/database.js';
-import { applySchema, registerWebhook } from './deploy.js';
+import { registerWebhook, runMigrations } from './deploy.js';
 
 async function main() {
-  const db = await connectToDb();
-  await applySchema(db);
+  await runMigrations();
   const baseUrl = process.env.WEBHOOK_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
   if (!process.env.TOKEN) {
     throw new Error('TOKEN is not set');

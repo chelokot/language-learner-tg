@@ -21,6 +21,8 @@ A spaced repetition Telegram bot built in TypeScript. The bot uses serverless fu
 - `npm run lint` – check formatting with Biome
 - `npm run format` – format the code
 - `npm test` – run unit and integration tests
+- `npm run migrate` – apply pending database migrations
+- `npm run test:migrations` – verify migrations run cleanly
 
 The repository follows a strict **test‑driven development** approach.  Every new feature starts with a failing test which is then made to pass.  See `docs/design.md` for the details of the SBSR algorithm and database structure.
 
@@ -40,7 +42,5 @@ See [docs/design.md](docs/design.md) for architectural details.
 Detailed deployment instructions are available in
 [docs/vercel-setup.md](docs/vercel-setup.md). The `vercel.json` file
 sets the output directory to the repository root so Vercel deploys the
-compiled API functions. The build process runs `npm run postdeploy`
-which prepares the database schema and configures the Telegram webhook
-automatically. Locale files in `src/locales` are bundled via
+compiled API functions. The build process runs `npm run postdeploy`, applying pending migrations via Graphile Migrate and configuring the Telegram webhook automatically. Locale files in `src/locales` are bundled via
 `vercel.json` so translations work in production.

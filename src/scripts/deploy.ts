@@ -1,20 +1,15 @@
-import { readFile } from 'node:fs/promises';
-import type { Database } from '../types/database.js';
+import { execFile } from 'node:child_process';
 
-export async function applySchema(db: Database) {
-  const file = new URL('../../sql/schema.sql', import.meta.url);
-  const sql = await readFile(file, 'utf8');
-  const noComments = sql
-    .split('\n')
-    .filter(line => !line.trim().startsWith('--'))
-    .join('\n');
-  const statements = noComments
-    .split(';')
-    .map(s => s.trim())
-    .filter(Boolean);
-  for (const stmt of statements) {
-    await db.query(stmt);
-  }
+export async function runMigrations() {
+  await new Promise<void>((resolve, reject) => {
+    execFile('graphile-migrate', ['migrate'], err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
 }
 
 export async function registerWebhook(token: string, baseUrl: string, fetchFn = fetch) {
