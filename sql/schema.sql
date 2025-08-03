@@ -46,6 +46,9 @@ ALTER TABLE app_user
 ALTER TABLE word
   ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id);
 
+ALTER TABLE word
+  ADD COLUMN IF NOT EXISTS base_id INTEGER;
+
 UPDATE word
 SET    vocabulary_id = base_id
 WHERE  base_id IS NOT NULL
@@ -57,6 +60,9 @@ ALTER TABLE word
 -- === exercise_state =====================================================
 ALTER TABLE exercise_state
   ADD COLUMN IF NOT EXISTS vocabulary_id INTEGER REFERENCES vocabulary(id);
+
+ALTER TABLE exercise_state
+  ADD COLUMN IF NOT EXISTS base_id INTEGER;
 
 UPDATE exercise_state
 SET    vocabulary_id = base_id
