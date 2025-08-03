@@ -1,4 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
+import { existsSync } from 'node:fs';
+
+describe('project setup', () => {
+  it('includes graphile-migrate config', () => {
+    expect(existsSync('.gmrc')).toBe(true);
+  });
+});
 
 describe('runMigrations', () => {
   it('executes graphile-migrate CLI', async () => {
