@@ -1,11 +1,11 @@
 import { conversations } from '@grammyjs/conversations';
 import type { I18n } from '@grammyjs/i18n/dist/source/i18n.js';
 import { Bot as TelegramBot } from 'grammy';
+import type { Transformer } from 'grammy/out/core/client.js';
 
 import { helpController } from '../controllers/help.js';
 import { setupMenu } from '../controllers/menu.js';
 import { startController } from '../controllers/start.js';
-import { stopController } from '../controllers/stop.js';
 import { resolvePath } from '../helpers/resolve-path.js';
 import type { CustomContext } from '../types/context.js';
 import type { Database } from '../types/database.js';
@@ -25,17 +25,19 @@ function setupMiddlewares(bot: Bot, localeEngine: I18n) {
 
 function setupControllers(bot: Bot) {
   bot.use(startController);
-  bot.use(stopController);
   bot.use(helpController);
   setupMenu(bot);
 }
 
-export function createBot(database: Database) {
+export function createBot(database: Database, options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] }) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {
     client: process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : undefined,
   });
+  if (options?.apiTransformers) {
+    bot.api.config.use(...options.apiTransformers);
+  }
 
   // Create context extension middleware
   const extendContextMiddleware = createExtendContextMiddleware(database);
@@ -44,9 +46,14 @@ export function createBot(database: Database) {
 
   // Set up context extension both outside and inside conversations
   bot.use(extendContextMiddleware);
+  if (options?.preMiddlewares) {
+    for (const mw of options.preMiddlewares) bot.use(mw);
+  }
   bot.use(
     conversations({
-      plugins: [extendContextMiddleware],
+      plugins: options?.preMiddlewares
+        ? [extendContextMiddleware, ...options.preMiddlewares]
+        : [extendContextMiddleware],
     }),
   );
 
@@ -56,8 +63,11 @@ export function createBot(database: Database) {
   return bot;
 }
 
-export async function startBot(database: Database) {
-  const bot = createBot(database);
+export async function startBot(
+  database: Database,
+  options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] },
+) {
+  const bot = createBot(database, options);
 
   return new Promise(resolve =>
     bot.start({
