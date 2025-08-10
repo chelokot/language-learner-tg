@@ -86,7 +86,7 @@
   { "role": "user", "text": "tap Exercises" },
   {
     "role": "bot",
-    "text": "Your current selected vocabulary is “c1 preparation” \\(English words\\)\\. Go to /vocabs to change it\\.\n\nChoose translation exercise to train\\.\n\n**“Word”** \\= translate one word directly\\.\n**“Sentence”** \\= translate the whole sentence\\.\n\n**English→Russian** task includes at least one word from your list\\.\n**Russian→English** task requires your answer to include at least one word from your list\\.",
+    "text": "Your current selected vocabulary is “c1 preparation” (English words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n<b>“Word”</b> = translate one word directly.\n<b>“Sentence”</b> = translate the whole sentence.\n\n<b>English→Russian</b> task includes at least one word from your list.\n<b>Russian→English</b> task requires your answer to include at least one word from your list.",
     "buttons": [
       "Word EN→RU",
       "Word RU→EN",
