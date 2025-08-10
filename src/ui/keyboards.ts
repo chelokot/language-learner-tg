@@ -45,13 +45,13 @@ export const kbExercisesForVocab = (v: Vocabulary) => {
   const g = (v.goal_code || v.goal_language).toUpperCase();
   const n = (v.native_code || v.native_language).toUpperCase();
   return new InlineKeyboard()
-    .text(`Word ${dir(g, n)}`, 'exercise:word:gn')
-    .row()
     .text(`Word ${dir(n, g)}`, 'exercise:word:ng')
     .row()
-    .text(`Sentence ${dir(g, n)}`, 'exercise:sentence:gn')
+    .text(`Word ${dir(g, n)}`, 'exercise:word:gn')
     .row()
     .text(`Sentence ${dir(n, g)}`, 'exercise:sentence:ng')
+    .row()
+    .text(`Sentence ${dir(g, n)}`, 'exercise:sentence:gn')
     .row()
     .text('Back', 'menu');
 };

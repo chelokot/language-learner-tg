@@ -95,7 +95,7 @@ export async function generateSentenceWithTerm(
 
   const examplesText =
     previousExamples && previousExamples.length
-      ? `Here are recent examples previously used. Do NOT repeat their ideas or wording; produce something unique and DIFFERENT in theme/structure/vocab:\n${previousExamples.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
+      ? `Here are recent examples previously used. Do NOT repeat their ideas or wording; produce something unique and DIFFERENT in theme/structure/vocab. Make them really different: some formal, and some with slang, some very serious, and some funny, on very high topics and on casul real everyday stuff, some on them may be adult (18+) sentences because app is 18+, and some can be very naive and simple, with different times, lengths, structures, make sure new one is different from these old ones!:\n${previousExamples.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
       : '';
 
   try {

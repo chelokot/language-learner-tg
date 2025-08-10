@@ -368,6 +368,9 @@ export async function exerciseConversation(
   }
   const { goal_language: goalLanguage, native_language: nativeLanguage, level } = vocab;
 
+  let nextTaskHolderMsgId: number | null = null;
+  const chatId = ctx.chat!.id;
+
   while (true) {
     const word = await conv.external(() => getRandomWord({ db: ctx.db, vocabularyId: vocabId }));
     if (!word) {
@@ -403,48 +406,85 @@ export async function exerciseConversation(
         goalWord: word.goal,
         nativeWord: word.native,
       });
+
+      let holderMsgId = nextTaskHolderMsgId;
+      if (holderMsgId == null) {
+        const holder = await ctx.reply('Generating the task…');
+        holderMsgId = holder.message_id;
+      }
+      nextTaskHolderMsgId = null;
+
       let sentence = '';
       if (dir === 'gn') {
         sentence = await conv.external(() =>
           generateSentenceWithTerm(goalLanguage, word.goal, 'goal', level, examples),
         );
-        await ctx.reply(`Translate this sentence from ${goalLanguage} to ${nativeLanguage}:\n${sentence}`);
-        const answer = await waitText(conv);
-        if (answer === '/stop') break;
+        await ctx.api.editMessageText(
+          chatId,
+          holderMsgId,
+          `Translate this sentence from ${goalLanguage} to ${nativeLanguage}:\n\n${sentence}\n\n/stop to finish exercise.`,
+        );
 
+        const answer = await waitText(conv);
+        if (answer === '/stop') {
+          try { await ctx.api.deleteMessage(chatId, holderMsgId); } catch {}
+          break;
+        }
+
+        const analyzing = await ctx.reply('Analyzing your answer…');
         const result = await conv.external(() =>
           judgeTranslation(sentence, answer, goalLanguage, nativeLanguage, word.goal, word.native, level),
         );
-        await conv.external(() =>
-          updateWordAnswerStats({
-            db: ctx.db,
-            wordId: word.id,
-            correct: result.ok,
-          }),
+        await conv.external(() => updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: result.ok,
+        }));
+        await ctx.api.editMessageText(
+          chatId,
+          analyzing.message_id,
+          result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`,
         );
-        await ctx.reply(result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`);
+
       } else {
         sentence = await conv.external(() =>
           generateSentenceWithTerm(nativeLanguage, word.native, 'native', level, examples),
         );
-        await ctx.reply(
-          `Translate this sentence from ${nativeLanguage} to ${goalLanguage}:\n\n${sentence}\n\nRemember to include at least one word from your list.`,
+        await ctx.api.editMessageText(
+          chatId,
+          holderMsgId,
+          `Translate this sentence from ${nativeLanguage} to ${goalLanguage}:\n\n${sentence}\n\nRemember to include at least one word from your list. /stop to finish exercise.`,
         );
-        const answer = await waitText(conv);
-        if (answer === '/stop') break;
 
+        const answer = await waitText(conv);
+        if (answer === '/stop') {
+          try { await ctx.api.deleteMessage(chatId, holderMsgId); } catch {}
+          break;
+        }
+
+        const analyzing = await ctx.reply('Analyzing your answer…');
         const result = await conv.external(() =>
           judgeTranslation(sentence, answer, nativeLanguage, goalLanguage, word.goal, word.native, level),
         );
-        await conv.external(() =>
-          updateWordAnswerStats({
-            db: ctx.db,
-            wordId: word.id,
-            correct: result.ok,
-          }),
+        await conv.external(() => updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: result.ok,
+        }));
+        await ctx.api.editMessageText(
+          chatId,
+          analyzing.message_id,
+          result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`,
         );
-        await ctx.reply(result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`);
       }
+
+      try {
+        const nextHolder = await ctx.reply('Generating the task…');
+        nextTaskHolderMsgId = nextHolder.message_id;
+      } catch {
+        nextTaskHolderMsgId = null;
+      }
+
       await conv.external(() => saveSentenceExample({
         db: ctx.db,
         userId: ctx.dbEntities.user.user_id,
@@ -456,6 +496,10 @@ export async function exerciseConversation(
         sentence,
       }));
     }
+  }
+
+  if (nextTaskHolderMsgId != null) {
+    try { await ctx.api.deleteMessage(chatId, nextTaskHolderMsgId); } catch {}
   }
 
   await conv.external(() => showMenu(ctx));
