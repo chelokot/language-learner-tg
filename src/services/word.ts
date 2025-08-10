@@ -1,4 +1,4 @@
-import type { Database } from "../types/database.js";
+import type { Database } from '../types/database.js';
 
 export type WordRow = {
   id: number;
@@ -22,7 +22,7 @@ export async function countWordsInVocabulary(args: {
   vocabularyId: number;
 }): Promise<number> {
   const res = await args.db.query<{ count: string }>(
-    "SELECT COUNT(*)::text AS count FROM word WHERE vocabulary_id=$1",
+    'SELECT COUNT(*)::text AS count FROM word WHERE vocabulary_id=$1',
     [args.vocabularyId],
   );
   return Number(res.rows[0]?.count || 0);
@@ -58,7 +58,7 @@ export async function listWordStatsForVocabulary(args: {
        WHERE vocabulary_id=$1`,
       [args.vocabularyId],
     );
-    return res.rows.map((r) => ({
+    return res.rows.map(r => ({
       id: r.id,
       goal: r.goal,
       native: r.native,
@@ -72,10 +72,8 @@ export async function listWordStatsForVocabulary(args: {
       id: number;
       goal: string;
       native: string;
-    }>(`SELECT id, goal, native FROM word WHERE vocabulary_id=$1`, [
-      args.vocabularyId,
-    ]);
-    return res.rows.map((r) => ({
+    }>(`SELECT id, goal, native FROM word WHERE vocabulary_id=$1`, [args.vocabularyId]);
+    return res.rows.map(r => ({
       id: r.id,
       goal: r.goal,
       native: r.native,
@@ -105,9 +103,7 @@ export async function deleteWordsByTexts(args: {
   vocabularyId: number;
   tokens: string[];
 }): Promise<{ deleted: Array<{ id: number; goal: string; native: string }> }> {
-  const tokens = Array.from(
-    new Set(args.tokens.map((t) => t.trim().toLowerCase()).filter(Boolean)),
-  );
+  const tokens = Array.from(new Set(args.tokens.map(t => t.trim().toLowerCase()).filter(Boolean)));
   if (tokens.length === 0) return { deleted: [] };
 
   const res = await args.db.query<{ id: number; goal: string; native: string }>(
@@ -140,7 +136,7 @@ export async function deleteWord(args: {
   db: Database;
   wordId: number;
 }): Promise<void> {
-  await args.db.query("DELETE FROM word WHERE id=$1", [args.wordId]);
+  await args.db.query('DELETE FROM word WHERE id=$1', [args.wordId]);
 }
 
 export async function editWord(args: {
@@ -150,7 +146,7 @@ export async function editWord(args: {
   native: string;
 }): Promise<Word> {
   const result = await args.db.query<Word>(
-    "UPDATE word SET goal=$2, native=$3 WHERE id=$1 RETURNING id, vocabulary_id, goal, native",
+    'UPDATE word SET goal=$2, native=$3 WHERE id=$1 RETURNING id, vocabulary_id, goal, native',
     [args.wordId, args.goal, args.native],
   );
   return result.rows[0];
@@ -160,10 +156,9 @@ export async function listWords(args: {
   db: Database;
   vocabularyId: number;
 }): Promise<Word[]> {
-  const result = await args.db.query<Word>(
-    "SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1",
-    [args.vocabularyId],
-  );
+  const result = await args.db.query<Word>('SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1', [
+    args.vocabularyId,
+  ]);
   return result.rows;
 }
 
@@ -172,7 +167,7 @@ export async function getRandomWord(args: {
   vocabularyId: number;
 }): Promise<Word | null> {
   const result = await args.db.query<Word>(
-    "SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1",
+    'SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1',
     [args.vocabularyId],
   );
   return result.rows[0] ?? null;

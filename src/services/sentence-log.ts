@@ -1,11 +1,11 @@
-import type { Database } from "../types/database.js";
+import type { Database } from '../types/database.js';
 
 export type SentenceLogRow = {
   id: number;
   user_id: number;
   vocabulary_id: number;
-  exercise_kind: "sentence" | "word";
-  direction: "gn" | "ng";
+  exercise_kind: 'sentence' | 'word';
+  direction: 'gn' | 'ng';
   goal_word: string | null;
   native_word: string | null;
   sentence: string;
@@ -16,8 +16,8 @@ export async function saveSentenceExample(args: {
   db: Database;
   userId: number;
   vocabularyId: number;
-  exerciseKind: "sentence";
-  direction: "gn" | "ng";
+  exerciseKind: 'sentence';
+  direction: 'gn' | 'ng';
   goalWord?: string | null;
   nativeWord?: string | null;
   sentence: string;
@@ -42,8 +42,8 @@ export async function getRecentSentenceExamples(args: {
   db: Database;
   userId: number;
   vocabularyId: number;
-  exerciseKind: "sentence";
-  direction: "gn" | "ng";
+  exerciseKind: 'sentence';
+  direction: 'gn' | 'ng';
   goalWord?: string | null;
   nativeWord?: string | null;
   limit?: number;
@@ -71,7 +71,7 @@ export async function getRecentSentenceExamples(args: {
       LIM,
     ],
   );
-  let out: string[] = exact.rows.map((r) => r.sentence);
+  const out: string[] = exact.rows.map(r => r.sentence);
   if (out.length >= LIM) return out;
 
   const rest1 = await args.db.query<{ sentence: string }>(

@@ -1,4 +1,4 @@
-import { LlmUnavailableError, chat } from "./llm.js";
+import { LlmUnavailableError, chat } from './llm.js';
 
 /**
 
@@ -6,20 +6,20 @@ import { LlmUnavailableError, chat } from "./llm.js";
 * Used as a fast path and for tests without LLM.
   */
 const COMMON_CODES: Record<string, string> = {
-  english: "EN",
-  russian: "RU",
-  ukrainian: "UK",
-  ukrainian_u: "UA", // sometimes desired
-  german: "DE",
-  french: "FR",
-  spanish: "ES",
-  italian: "IT",
-  polish: "PL",
-  portuguese: "PT",
-  dutch: "NL",
-  japanese: "JA",
-  chinese: "ZH",
-  korean: "KO",
+  english: 'EN',
+  russian: 'RU',
+  ukrainian: 'UK',
+  ukrainian_u: 'UA', // sometimes desired
+  german: 'DE',
+  french: 'FR',
+  spanish: 'ES',
+  italian: 'IT',
+  polish: 'PL',
+  portuguese: 'PT',
+  dutch: 'NL',
+  japanese: 'JA',
+  chinese: 'ZH',
+  korean: 'KO',
 };
 
 /** Try to infer a short language code; prefer LLM if available; fallback to heuristics. */
@@ -29,23 +29,23 @@ export async function inferLanguageCode(langName: string): Promise<string> {
   // Fallback: 2–3 letter uppercase prefix
   const fallback =
     key
-      .replace(/[^a-z]/g, "")
+      .replace(/[^a-z]/g, '')
       .slice(0, 3)
-      .toUpperCase() || "XX";
+      .toUpperCase() || 'XX';
 
   try {
     const content = await chat([
       {
-        role: "system",
+        role: 'system',
         content:
-          "You are a strict normalizer. Given a human language name, answer with a short code (2–4 letters). Prefer ISO 639-1 when obvious, else common 2–3 letter forms. Answer with the code ONLY.",
+          'You are a strict normalizer. Given a human language name, answer with a short code (2–4 letters). Prefer ISO 639-1 when obvious, else common 2–3 letter forms. Answer with the code ONLY.',
       },
-      { role: "user", content: langName },
+      { role: 'user', content: langName },
     ]);
     const code = content
       .trim()
       .toUpperCase()
-      .replace(/[^A-Z]/g, "")
+      .replace(/[^A-Z]/g, '')
       .slice(0, 4);
     return code || fallback;
   } catch (e) {
@@ -64,16 +64,16 @@ export async function autoTranslate(
   try {
     const content = await chat([
       {
-        role: "system",
+        role: 'system',
         content:
-          "You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe. Take user goal language level into account to not propose too simple or too complex translation.",
+          'You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe. Take user goal language level into account to not propose too simple or too complex translation.',
       },
       {
-        role: "user",
+        role: 'user',
         content: `Goal language level: ${level}.\n\nTranslate from ${fromLang} to ${toLang}:\n\n${text}`,
       },
     ]);
-    return content.replace(/^["“”]+|["“”]+$/g, "").trim();
+    return content.replace(/^["“”]+|["“”]+$/g, '').trim();
   } catch (e) {
     if (e instanceof LlmUnavailableError) return null;
     throw e;
@@ -84,30 +84,29 @@ export async function autoTranslate(
 export async function generateSentenceWithTerm(
   language: string,
   targetTerm: string,
-  direction: "goal" | "native",
+  direction: 'goal' | 'native',
   level: string,
   previousExamples: string[],
 ): Promise<string> {
   const fallback =
-    direction === "goal"
+    direction === 'goal'
       ? `This simple sentence uses the word "${targetTerm}".`
       : `Це просте речення використовує слово "${targetTerm}".`;
 
   const examplesText =
     previousExamples && previousExamples.length
-      ? `Here are recent examples previously used. Do NOT repeat their ideas or wording; produce something unique and DIFFERENT in theme/structure/vocab:\n` +
-        previousExamples.map((s, i) => `${i + 1}. ${s}`).join("\n")
-      : "";
+      ? `Here are recent examples previously used. Do NOT repeat their ideas or wording; produce something unique and DIFFERENT in theme/structure/vocab:\n${previousExamples.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
+      : '';
 
   try {
     const content = await chat([
       {
-        role: "system",
+        role: 'system',
         content:
-          "Write one short, natural sentence in the requested language. The sentence MUST include the given target term exactly once (or its inflected form). It must be interesting an unique. Take user goal language level into account to not propose too simple or too complex translation.",
+          'Write one short, natural sentence in the requested language. The sentence MUST include the given target term exactly once (or its inflected form). It must be interesting an unique. Take user goal language level into account to not propose too simple or too complex translation.',
       },
       {
-        role: "user",
+        role: 'user',
         content: `${examplesText}\n\nGoal language level: ${level}.\nLanguage: ${language}\nTarget term to include: ${targetTerm}`,
       },
     ]);
@@ -130,25 +129,22 @@ export async function judgeTranslation(
   try {
     const content = await chat([
       {
-        role: "system",
+        role: 'system',
         content:
           'You are a concise grader. Decide if the learner translation is acceptable. Minor grammar/spelling errors are OK. Take user goal language level into account to not expect too simple or too complex translation. Main goal of this exercise is WORD learning. The word that needs to be learned will be provided into the prompt. Whether that word was correctly translated and used in context is the MAIN thing to consider. Respond with JSON: {"ok": true/false, "feedback": "one sentence"}.',
       },
       {
-        role: "user",
+        role: 'user',
         content: `Goal language level: ${level}.\nWord being trained: ${nativeWord}->${goalWord}. It's important for user to learn ${goalWord} word, ${nativeWord} is allowed to be replaced with close synonym, but ${goalWord} is not.\nSource (${fromLang}): ${source}\nLearner answer (${toLang}): ${userAnswer}`,
       },
     ]);
     const parsed = safeParseJson(content);
-    if (
-      typeof parsed?.ok === "boolean" &&
-      typeof parsed?.feedback === "string"
-    ) {
+    if (typeof parsed?.ok === 'boolean' && typeof parsed?.feedback === 'string') {
       return { ok: parsed.ok, feedback: parsed.feedback.trim() };
     }
   } catch (e) {
     if (e instanceof LlmUnavailableError) {
-      console.warn("LLM unavailable, using heuristic translation judge.");
+      console.warn('LLM unavailable, using heuristic translation judge.');
     } else {
       throw e;
     }
@@ -157,8 +153,8 @@ export async function judgeTranslation(
   // Heuristic fallback: accept if non-empty, not identical to source
   let ok = userAnswer.trim().length > 0 && userAnswer.trim() !== source.trim();
   // if original contains goal word, check if answer contains native word and vice versa
-  const goalWordRegex = new RegExp(escapeRegExp(goalWord), "i");
-  const nativeWordRegex = new RegExp(escapeRegExp(nativeWord), "i");
+  const goalWordRegex = new RegExp(escapeRegExp(goalWord), 'i');
+  const nativeWordRegex = new RegExp(escapeRegExp(nativeWord), 'i');
   if (
     (source.match(goalWordRegex) && !userAnswer.match(nativeWordRegex)) ||
     (source.match(nativeWordRegex) && !userAnswer.match(goalWordRegex))
@@ -167,7 +163,7 @@ export async function judgeTranslation(
   }
   return {
     ok,
-    feedback: ok ? "Looks fine." : "That does not seem correct. Try again.",
+    feedback: ok ? 'Looks fine.' : 'That does not seem correct. Try again.',
   };
 }
 
@@ -188,5 +184,5 @@ function safeParseJson(s: string): any {
 }
 
 function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[]]/g, "$&");
+  return s.replace(/[.*+?^${}()|[]]/g, '$&');
 }

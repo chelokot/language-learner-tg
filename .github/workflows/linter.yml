@@ -1,4 +1,4 @@
-name: Unit tests
+name: Linter
 
 on:
   push:
@@ -14,9 +14,4 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run test:unit
-      - uses: davelosert/vitest-coverage-report-action@v2
-        if: always()
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          name: Coverage Report
+      - run: npm run lint

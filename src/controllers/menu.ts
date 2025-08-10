@@ -1,61 +1,48 @@
-import { createConversation } from "@grammyjs/conversations";
-import type { Conversation } from "@grammyjs/conversations";
-import { Composer } from "grammy";
-import { waitText } from "../helpers/wait-text.js";
-import { checkTranslation } from "../services/exercise.js";
+import { createConversation } from '@grammyjs/conversations';
+import type { Conversation } from '@grammyjs/conversations';
+import { Composer } from 'grammy';
+import { waitText } from '../helpers/wait-text.js';
+import { checkTranslation } from '../services/exercise.js';
+import { getRecentSentenceExamples, saveSentenceExample } from '../services/sentence-log.js';
+import { autoTranslate, generateSentenceWithTerm, inferLanguageCode, judgeTranslation } from '../services/translate.js';
+import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
 import {
-  getCurrentVocabularyId,
-  setCurrentVocabulary,
-} from "../services/user.js";
-import {
+  type Vocabulary,
   createVocabulary,
   deleteVocabulary,
   getVocabulary,
   listVocabularies,
   renameVocabulary,
-  Vocabulary,
-} from "../services/vocabulary.js";
+} from '../services/vocabulary.js';
 import {
   addWord,
-  getRandomWord,
   countWordsInVocabulary,
+  deleteWordsByTexts,
+  getRandomWord,
   listWordStatsForVocabulary,
   listWordsForVocabulary,
-  deleteWordsByTexts,
   updateWordAnswerStats,
-} from "../services/word.js";
-import type { CustomContext } from "../types/context.js";
+} from '../services/word.js';
+import type { CustomContext } from '../types/context.js';
 import {
+  kbConfirmDeleteVocabulary,
   kbExercisesForVocab,
   kbMenu,
   kbVocabularies,
   kbVocabulary,
-  kbConfirmDeleteVocabulary,
-} from "../ui/keyboards.js";
-import { CONVERSATION_NAMES } from "./CONVERSATION_NAMES.js";
-import {
-  autoTranslate,
-  generateSentenceWithTerm,
-  inferLanguageCode,
-  judgeTranslation,
-} from "../services/translate.js";
-import {
-  getRecentSentenceExamples,
-  saveSentenceExample,
-} from "../services/sentence-log.js";
+} from '../ui/keyboards.js';
+import { CONVERSATION_NAMES } from './CONVERSATION_NAMES.js';
 
 export const menuController = new Composer<CustomContext>();
 
 async function showMenu(ctx: CustomContext) {
   await ctx.reply(
-    "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
-    { reply_markup: kbMenu(), parse_mode: "MarkdownV2" },
+    'Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them',
+    { reply_markup: kbMenu(), parse_mode: 'MarkdownV2' },
   );
 }
 
-async function loadCurrentVocab(
-  ctx: CustomContext,
-): Promise<Vocabulary | null> {
+async function loadCurrentVocab(ctx: CustomContext): Promise<Vocabulary | null> {
   const currentId = ctx.dbEntities.user.current_vocab_id;
   if (!currentId) return null;
   return await getVocabulary({ db: ctx.db, vocabularyId: currentId });
@@ -67,18 +54,13 @@ async function showVocabularies(ctx: CustomContext) {
     ownerId: ctx.dbEntities.user.user_id,
   });
   const currentId = ctx.dbEntities.user.current_vocab_id;
-  const current = currentId
-    ? vocabs.find((v) => v.id === currentId)
-    : undefined;
+  const current = currentId ? vocabs.find(v => v.id === currentId) : undefined;
   const currentLabel = current
     ? `${current.name} (${(current.native_code || current.native_language).toUpperCase()}→${(current.goal_code || current.goal_language).toUpperCase()})`
-    : "none";
-  await ctx.reply(
-    `Vocabularies${vocabs.length ? `\nCurrent: ${currentLabel}` : ""}`,
-    {
-      reply_markup: kbVocabularies(vocabs),
-    },
-  );
+    : 'none';
+  await ctx.reply(`Vocabularies${vocabs.length ? `\nCurrent: ${currentLabel}` : ''}`, {
+    reply_markup: kbVocabularies(vocabs),
+  });
 }
 
 async function showVocabulary(ctx: CustomContext, id: number) {
@@ -91,13 +73,9 @@ async function showVocabulary(ctx: CustomContext, id: number) {
     vocabularyId: id,
   });
 
-  const top = [...stats]
-    .sort((a, b) => b.score - a.score || a.goal.localeCompare(b.goal))
-    .slice(0, 5);
+  const top = [...stats].sort((a, b) => b.score - a.score || a.goal.localeCompare(b.goal)).slice(0, 5);
 
-  const bottom = [...stats]
-    .sort((a, b) => a.score - b.score || a.goal.localeCompare(b.goal))
-    .slice(0, 5);
+  const bottom = [...stats].sort((a, b) => a.score - b.score || a.goal.localeCompare(b.goal)).slice(0, 5);
 
   const fmt = (w: (typeof stats)[number], i: number) =>
     `${i}. ${w.goal}/${w.native} - ${w.correct} correct, ${w.mistakes} mistakes`;
@@ -116,7 +94,7 @@ async function showVocabulary(ctx: CustomContext, id: number) {
     ...bottom.map((w, i) => fmt(w, i + 1)),
   ];
 
-  await ctx.reply(lines.join("\n"), {
+  await ctx.reply(lines.join('\n'), {
     reply_markup: kbVocabulary(id),
   });
 }
@@ -127,12 +105,9 @@ async function showExercises(ctx: CustomContext) {
     ownerId: ctx.dbEntities.user.user_id,
   });
   if (vocabs.length === 0) {
-    await ctx.reply(
-      "You do not have any vocabularies yet. Create your first one:",
-      {
-        reply_markup: kbVocabularies([]),
-      },
-    );
+    await ctx.reply('You do not have any vocabularies yet. Create your first one:', {
+      reply_markup: kbVocabularies([]),
+    });
     return;
   }
   let current = await loadCurrentVocab(ctx);
@@ -148,7 +123,7 @@ async function showExercises(ctx: CustomContext) {
   }
   await ctx.reply(
     `Your current selected vocabulary is “${current.name}” (${current.goal_language} words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n**“Word”** = translate one word directly.\n**“Sentence”** = translate the whole sentence.\n\n**${current.goal_language}→${current.native_language}** task includes at least one word from your list.\n**${current.native_language}→${current.goal_language}** task requires your answer to include at least one word from your list.`,
-    { reply_markup: kbExercisesForVocab(current), parse_mode: "MarkdownV2" },
+    { reply_markup: kbExercisesForVocab(current), parse_mode: 'MarkdownV2' },
   );
 }
 
@@ -161,65 +136,55 @@ async function ack(ctx: CustomContext) {
   }
 }
 
-menuController.command("menu", showMenu);
-menuController.callbackQuery("menu", async (ctx) => {
+menuController.command('menu', showMenu);
+menuController.callbackQuery('menu', async ctx => {
   await ack(ctx);
   await showMenu(ctx);
 });
-menuController.callbackQuery("vocabularies", async (ctx) => {
+menuController.callbackQuery('vocabularies', async ctx => {
   await ack(ctx);
   await showVocabularies(ctx);
 });
-menuController.callbackQuery("exercises", async (ctx) => {
+menuController.callbackQuery('exercises', async ctx => {
   await ack(ctx);
   await showExercises(ctx);
 });
-menuController.callbackQuery("back_to_vocabularies", async (ctx) => {
+menuController.callbackQuery('back_to_vocabularies', async ctx => {
   await ack(ctx);
   await showVocabularies(ctx);
 });
-menuController.callbackQuery(/open_vocab:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/open_vocab:(\d+)/, async ctx => {
   await ack(ctx);
   await showVocabulary(ctx, Number(ctx.match[1]));
 });
-menuController.callbackQuery("create_vocab", async (ctx) => {
+menuController.callbackQuery('create_vocab', async ctx => {
   await ack(ctx);
   await ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary);
 });
-menuController.callbackQuery(/add_word:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/add_word:(\d+)/, async ctx => {
   await ack(ctx);
-  console.log("enter conversation...");
-  await ctx.conversation.enter(
-    CONVERSATION_NAMES.addWord,
-    Number(ctx.match[1]),
-  );
+  console.log('enter conversation...');
+  await ctx.conversation.enter(CONVERSATION_NAMES.addWord, Number(ctx.match[1]));
 });
-menuController.callbackQuery(/rename_vocab:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/rename_vocab:(\d+)/, async ctx => {
   await ack(ctx);
-  await ctx.conversation.enter(
-    CONVERSATION_NAMES.renameVocabulary,
-    Number(ctx.match[1]),
-  );
+  await ctx.conversation.enter(CONVERSATION_NAMES.renameVocabulary, Number(ctx.match[1]));
 });
 
-menuController.callbackQuery(/delete_words:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/delete_words:(\d+)/, async ctx => {
   await ack(ctx);
-  await ctx.conversation.enter(
-    CONVERSATION_NAMES.deleteWords,
-    Number(ctx.match[1]),
-  );
+  await ctx.conversation.enter(CONVERSATION_NAMES.deleteWords, Number(ctx.match[1]));
 });
 
-menuController.callbackQuery(/delete_vocab_confirm:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/delete_vocab_confirm:(\d+)/, async ctx => {
   await ack(ctx);
   const id = Number(ctx.match[1]);
-  await ctx.reply(
-    `Are you sure you want to delete this vocabulary? This cannot be undone.`,
-    { reply_markup: kbConfirmDeleteVocabulary(id) },
-  );
+  await ctx.reply(`Are you sure you want to delete this vocabulary? This cannot be undone.`, {
+    reply_markup: kbConfirmDeleteVocabulary(id),
+  });
 });
 
-menuController.callbackQuery(/delete_vocab:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/delete_vocab:(\d+)/, async ctx => {
   await ack(ctx);
   await deleteVocabulary({
     db: ctx.db,
@@ -229,7 +194,7 @@ menuController.callbackQuery(/delete_vocab:(\d+)/, async (ctx) => {
   await showVocabularies(ctx);
 });
 
-menuController.callbackQuery(/select_vocab:(\d+)/, async (ctx) => {
+menuController.callbackQuery(/select_vocab:(\d+)/, async ctx => {
   await ack(ctx);
   await setCurrentVocabulary({
     db: ctx.db,
@@ -237,46 +202,35 @@ menuController.callbackQuery(/select_vocab:(\d+)/, async (ctx) => {
     vocabularyId: Number(ctx.match[1]),
   });
   ctx.dbEntities.user.current_vocab_id = Number(ctx.match[1]);
-  await ctx.answerCallbackQuery("Selected");
+  await ctx.answerCallbackQuery('Selected');
   await showVocabularies(ctx);
 });
-menuController.callbackQuery(
-  /exercise:(word|sentence):(gn|ng)/,
-  async (ctx) => {
-    await ack(ctx);
-    await ctx.conversation.enter(
-      CONVERSATION_NAMES.exercise,
-      ctx.match![1],
-      ctx.match![2],
-    );
-  },
-);
+menuController.callbackQuery(/exercise:(word|sentence):(gn|ng)/, async ctx => {
+  await ack(ctx);
+  await ctx.conversation.enter(CONVERSATION_NAMES.exercise, ctx.match![1], ctx.match![2]);
+});
 
 export async function createVocabularyConversation(
   conv: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
 ) {
-  await ctx.reply(
-    "Enter the name of the language you are learning \\(Goal language\\), for example `English`:",
-    { parse_mode: "MarkdownV2" },
-  );
+  await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
+    parse_mode: 'MarkdownV2',
+  });
   const goalLanguage = await waitText(conv);
 
   await ctx.reply(
-    "Enter the name of your language used for translations \\(Native language\\), for example `Russian`:",
-    { parse_mode: "MarkdownV2" },
+    'Enter the name of your language used for translations \\(Native language\\), for example `Russian`:',
+    { parse_mode: 'MarkdownV2' },
   );
   const nativeLanguage = await waitText(conv);
 
-  await ctx.reply(
-    "Now enter a name for this vocabulary, for example `c1 preparation`:",
-    { parse_mode: "MarkdownV2" },
-  );
+  await ctx.reply('Now enter a name for this vocabulary, for example `c1 preparation`:', { parse_mode: 'MarkdownV2' });
   const name = await waitText(conv);
 
   await ctx.reply(
-    "What target level is this vocabulary for? Answer in any format, for example: `c1`, `intermediate`, or `I am total beginner`:",
-    { parse_mode: "MarkdownV2" },
+    'What target level is this vocabulary for? Answer in any format, for example: `c1`, `intermediate`, or `I am total beginner`:',
+    { parse_mode: 'MarkdownV2' },
   );
   const level = (await waitText(conv)).trim();
 
@@ -320,7 +274,7 @@ export async function renameVocabularyConversation(
   ctx: CustomContext,
   vocabularyId: number,
 ) {
-  await ctx.reply("Send new vocabulary name");
+  await ctx.reply('Send new vocabulary name');
   const name = await waitText(conv);
 
   const vocab = await conv.external(() =>
@@ -341,73 +295,48 @@ export async function addWordConversation(
   ctx: CustomContext,
   vocabularyId: number,
 ) {
-  const vocab = await conv.external(() =>
-    getVocabulary({ db: ctx.db, vocabularyId }),
-  );
+  const vocab = await conv.external(() => getVocabulary({ db: ctx.db, vocabularyId }));
   if (!vocab) {
-    await ctx.reply("Vocabulary not found.");
+    await ctx.reply('Vocabulary not found.');
     return;
   }
-  const {
-    goal_language: goalLanguage,
-    native_language: nativeLanguage,
-    level,
-  } = vocab;
+  const { goal_language: goalLanguage, native_language: nativeLanguage, level } = vocab;
 
   while (true) {
     await ctx.reply(`Type next word in ${goalLanguage}. Send /stop to finish.`);
     const goal = await waitText(conv);
-    if (goal === "/stop") break;
+    if (goal === '/stop') break;
 
-    await ctx.reply(
-      `Type its translation in ${nativeLanguage}, or tap /auto to translate automatically.`,
-    );
+    await ctx.reply(`Type its translation in ${nativeLanguage}, or tap /auto to translate automatically.`);
     let native = await waitText(conv);
 
-    if (native === "/auto") {
-      const translated = await conv.external(() =>
-        autoTranslate(goal, goalLanguage, nativeLanguage, level),
-      );
+    if (native === '/auto') {
+      const translated = await conv.external(() => autoTranslate(goal, goalLanguage, nativeLanguage, level));
       if (translated) {
-        const saved = await conv.external(() =>
-          addWord({ db: ctx.db, vocabularyId, goal, native: translated }),
-        );
+        const saved = await conv.external(() => addWord({ db: ctx.db, vocabularyId, goal, native: translated }));
         await ctx.reply(
           `Saved “${goal}” → “${translated}”. Reply /fix to change the translation.\n\nNow enter the next ${goalLanguage} word, or /stop to finish.`,
         );
         const maybeFix = await waitText(conv);
-        if (maybeFix === "/fix") {
-          await ctx.reply(
-            `Enter the correct translation in ${nativeLanguage}:`,
-          );
+        if (maybeFix === '/fix') {
+          await ctx.reply(`Enter the correct translation in ${nativeLanguage}:`);
           native = await waitText(conv);
-          if (native === "/stop") break;
-          await conv.external(() =>
-            ctx.db.query("UPDATE word SET native=$2 WHERE id=$1", [
-              saved.id,
-              native,
-            ]),
-          );
+          if (native === '/stop') break;
+          await conv.external(() => ctx.db.query('UPDATE word SET native=$2 WHERE id=$1', [saved.id, native]));
           await ctx.reply(`Updated: “${goal}” → “${native}”.`);
-        } else if (maybeFix === "/stop") break;
+        } else if (maybeFix === '/stop') break;
         continue;
       } else {
-        await ctx.reply(
-          "Auto-translation is not available. Please enter the translation manually.",
-        );
+        await ctx.reply('Auto-translation is not available. Please enter the translation manually.');
         native = await waitText(conv);
-        if (native === "/stop") break;
+        if (native === '/stop') break;
       }
     }
 
-    if (native === "/stop") break;
+    if (native === '/stop') break;
 
-    await conv.external(() =>
-      addWord({ db: ctx.db, vocabularyId, goal, native }),
-    );
-    await ctx.reply(
-      `Saved “${goal}” → “${native}”. Enter next ${goalLanguage} word, or /stop to finish.`,
-    );
+    await conv.external(() => addWord({ db: ctx.db, vocabularyId, goal, native }));
+    await ctx.reply(`Saved “${goal}” → “${native}”. Enter next ${goalLanguage} word, or /stop to finish.`);
   }
 
   await conv.external(() => showMenu(ctx));
@@ -416,104 +345,68 @@ export async function addWordConversation(
 export async function exerciseConversation(
   conv: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
-  kind: "word" | "sentence",
-  dir: "gn" | "ng",
+  kind: 'word' | 'sentence',
+  dir: 'gn' | 'ng',
 ) {
   const vocabId = ctx.dbEntities.user.current_vocab_id;
   if (!vocabId) {
-    await ctx.reply("Select a vocabulary first");
+    await ctx.reply('Select a vocabulary first');
     return;
   }
 
-  const vocab = await conv.external(() =>
-    getVocabulary({ db: ctx.db, vocabularyId: vocabId }),
-  );
+  const vocab = await conv.external(() => getVocabulary({ db: ctx.db, vocabularyId: vocabId }));
   if (!vocab) {
-    await ctx.reply("Vocabulary not found");
+    await ctx.reply('Vocabulary not found');
     return;
   }
-  const {
-    goal_language: goalLanguage,
-    native_language: nativeLanguage,
-    level,
-  } = vocab;
+  const { goal_language: goalLanguage, native_language: nativeLanguage, level } = vocab;
 
   while (true) {
-    const word = await conv.external(() =>
-      getRandomWord({ db: ctx.db, vocabularyId: vocabId }),
-    );
+    const word = await conv.external(() => getRandomWord({ db: ctx.db, vocabularyId: vocabId }));
     if (!word) {
-      await ctx.reply("This vocabulary has no words yet. Add some first.");
+      await ctx.reply('This vocabulary has no words yet. Add some first.');
       break;
     }
 
-    if (kind === "word") {
-      if (dir === "gn") {
-        await ctx.reply(
-          `Translate this word from ${goalLanguage} to ${nativeLanguage}:\n${word.goal}`,
-        );
+    if (kind === 'word') {
+      if (dir === 'gn') {
+        await ctx.reply(`Translate this word from ${goalLanguage} to ${nativeLanguage}:\n${word.goal}`);
         const answer = await waitText(conv);
-        if (answer === "/stop") break;
+        if (answer === '/stop') break;
 
         const ok = checkTranslation(word.native, answer);
-        await conv.external(() =>
-          updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }),
-        );
-        await ctx.reply(
-          ok ? "Correct" : `Incorrect. Right answer: ${word.native}`,
-        );
+        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }));
+        await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.native}`);
       } else {
-        await ctx.reply(
-          `Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`,
-        );
+        await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
-        if (answer === "/stop") break;
+        if (answer === '/stop') break;
 
         const ok = checkTranslation(word.goal, answer);
-        await conv.external(() =>
-          updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }),
-        );
-        await ctx.reply(
-          ok ? "Correct" : `Incorrect. Right answer: ${word.goal}`,
-        );
+        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }));
+        await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.goal}`);
       }
     } else {
       const examples = await getRecentSentenceExamples({
         db: ctx.db,
         userId: ctx.dbEntities.user.user_id,
         vocabularyId: vocabId,
-        exerciseKind: "sentence",
+        exerciseKind: 'sentence',
         direction: dir,
         goalWord: word.goal,
         nativeWord: word.native,
       });
-      let sentence = "";
-      if (dir === "gn") {
+      let sentence = '';
+      if (dir === 'gn') {
         sentence = await conv.external(() =>
-          generateSentenceWithTerm(
-            goalLanguage,
-            word.goal,
-            "goal",
-            level,
-            examples,
-          ),
+          generateSentenceWithTerm(goalLanguage, word.goal, 'goal', level, examples),
         );
-        await ctx.reply(
-          `Translate this sentence from ${goalLanguage} to ${nativeLanguage}:\n${sentence}`,
-        );
+        await ctx.reply(`Translate this sentence from ${goalLanguage} to ${nativeLanguage}:\n${sentence}`);
         const answer = await waitText(conv);
-        if (answer === "/stop") break;
+        if (answer === '/stop') break;
 
         const result = await conv.external(() =>
-          judgeTranslation(
-            sentence,
-            answer,
-            goalLanguage,
-            nativeLanguage,
-            word.goal,
-            word.native,
-            level,
-          ),
+          judgeTranslation(sentence, answer, goalLanguage, nativeLanguage, word.goal, word.native, level),
         );
         await conv.external(() =>
           updateWordAnswerStats({
@@ -522,37 +415,19 @@ export async function exerciseConversation(
             correct: result.ok,
           }),
         );
-        await ctx.reply(
-          result.ok
-            ? `Correct. ${result.feedback}`
-            : `Not quite. ${result.feedback}`,
-        );
+        await ctx.reply(result.ok ? `Correct. ${result.feedback}` : `Not quite. ${result.feedback}`);
       } else {
         sentence = await conv.external(() =>
-          generateSentenceWithTerm(
-            nativeLanguage,
-            word.native,
-            "native",
-            level,
-            examples,
-          ),
+          generateSentenceWithTerm(nativeLanguage, word.native, 'native', level, examples),
         );
         await ctx.reply(
           `Translate this sentence from ${nativeLanguage} to ${goalLanguage}:\n${sentence}\nRemember to include at least one word from your list.`,
         );
         const answer = await waitText(conv);
-        if (answer === "/stop") break;
+        if (answer === '/stop') break;
 
         const result = await conv.external(() =>
-          judgeTranslation(
-            sentence,
-            answer,
-            nativeLanguage,
-            goalLanguage,
-            word.goal,
-            word.native,
-            level,
-          ),
+          judgeTranslation(sentence, answer, nativeLanguage, goalLanguage, word.goal, word.native, level),
         );
         await conv.external(() =>
           updateWordAnswerStats({
@@ -561,17 +436,13 @@ export async function exerciseConversation(
             correct: result.ok,
           }),
         );
-        await ctx.reply(
-          result.ok
-            ? `Correct. ${result.feedback}`
-            : `Not quite. ${result.feedback}`,
-        );
+        await ctx.reply(result.ok ? `Correct. ${result.feedback}` : `Not quite. ${result.feedback}`);
       }
       await saveSentenceExample({
         db: ctx.db,
         userId: ctx.dbEntities.user.user_id,
         vocabularyId: vocabId,
-        exerciseKind: "sentence",
+        exerciseKind: 'sentence',
         direction: dir,
         goalWord: word.goal,
         nativeWord: word.native,
@@ -590,50 +461,44 @@ export async function deleteWordsConversation(
 ) {
   const words = await listWordsForVocabulary({ db: ctx.db, vocabularyId });
   if (words.length === 0) {
-    await ctx.reply("This vocabulary has no words yet.");
+    await ctx.reply('This vocabulary has no words yet.');
     return;
   }
 
-  const list = words.map((w) => `\`${w.goal}\`/\`${w.native}\``).join("\n");
+  const list = words.map(w => `\`${w.goal}\`/\`${w.native}\``).join('\n');
   await ctx.reply(
     [
-      "Current words \\(tap to copy\\):",
-      "",
+      'Current words \\(tap to copy\\):',
+      '',
       list,
-      "",
-      "Send the words to delete \\(by their original form or translation\\).",
-      "Separate them by spaces or commas. Examples:",
-      "`дом, кот,  apple`",
-      "`дом кот apple`",
-    ].join("\n"),
-    { parse_mode: "MarkdownV2" },
+      '',
+      'Send the words to delete \\(by their original form or translation\\).',
+      'Separate them by spaces or commas. Examples:',
+      '`дом, кот,  apple`',
+      '`дом кот apple`',
+    ].join('\n'),
+    { parse_mode: 'MarkdownV2' },
   );
 
   const raw = await waitText(conv);
   const tokens = raw
     .split(/[,\s]+/g)
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean);
 
   if (tokens.length === 0) {
-    await ctx.reply("Nothing to delete.");
+    await ctx.reply('Nothing to delete.');
     await showVocabulary(ctx, vocabularyId);
     return;
   }
 
-  const result = await conv.external(() =>
-    deleteWordsByTexts({ db: ctx.db, vocabularyId, tokens }),
-  );
+  const result = await conv.external(() => deleteWordsByTexts({ db: ctx.db, vocabularyId, tokens }));
 
   if (result.deleted.length === 0) {
-    await ctx.reply("No matching words found.");
+    await ctx.reply('No matching words found.');
   } else {
-    const deletedList = result.deleted
-      .map((w) => `• ${w.goal} / ${w.native}`)
-      .join("\n");
-    await ctx.reply(
-      `Deleted ${result.deleted.length} word(s):\n${deletedList}`,
-    );
+    const deletedList = result.deleted.map(w => `• ${w.goal} / ${w.native}`).join('\n');
+    await ctx.reply(`Deleted ${result.deleted.length} word(s):\n${deletedList}`);
   }
   await showVocabulary(ctx, vocabularyId);
 }
