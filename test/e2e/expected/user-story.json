@@ -6,7 +6,11 @@
     "buttons": []
   },
   { "role": "user", "text": "/menu" },
-  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
+  {
+    "role": "bot",
+    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "buttons": ["Vocabularies", "Exercises"]
+  },
   { "role": "user", "text": "tap Vocabularies" },
   {
     "role": "bot",
@@ -79,11 +83,15 @@
     "buttons": []
   },
   { "role": "user", "text": "/stop" },
-  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
+  {
+    "role": "bot",
+    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "buttons": ["Vocabularies", "Exercises"]
+  },
   { "role": "user", "text": "tap Exercises" },
   {
     "role": "bot",
-    "text": "Your current selected vocabulary is “c1 preparation” (English words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n“Word” = translate one word directly. “Sentence” = translate the whole sentence.\n\nFor English→Russian translation, the prompt will include at least one word from your list.\nFor Russian→English translation, your answer must include at least one word from your list.",
+    "text": "Your current selected vocabulary is “c1 preparation” (English words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n**“Word”** = translate one word directly.\n**“Sentence”** = translate the whole sentence.\n\n**English→Russian** task includes at least one word from your list.\n**Russian→English** task requires your answer to include at least one word from your list.",
     "buttons": [
       "Word EN→RU",
       "Word RU→EN",
@@ -113,7 +121,11 @@
     "buttons": []
   },
   { "role": "user", "text": "/stop" },
-  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
+  {
+    "role": "bot",
+    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "buttons": ["Vocabularies", "Exercises"]
+  },
   { "role": "user", "text": "tap Vocabularies" },
   {
     "role": "bot",
