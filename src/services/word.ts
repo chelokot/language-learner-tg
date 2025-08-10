@@ -187,7 +187,7 @@ export async function updateWordAnswerStats(args: {
     `UPDATE word
        SET correct_count = COALESCE(correct_count, 0) + CASE WHEN $2 THEN 1 ELSE 0 END,
            wrong_count   = COALESCE(wrong_count,   0) + CASE WHEN $2 THEN 0 ELSE 1 END,
-           score         = GREATEST(1, COALESCE(score, 0) + CASE WHEN $2 THEN 1 ELSE -1 END)
+           score         = COALESCE(score, 0) + CASE WHEN $2 THEN 1 ELSE -1 END
      WHERE id = $1`,
     [args.wordId, args.correct],
   );

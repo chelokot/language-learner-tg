@@ -445,7 +445,7 @@ export async function exerciseConversation(
         );
         await ctx.reply(result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`);
       }
-      await saveSentenceExample({
+      await conv.external(() => saveSentenceExample({
         db: ctx.db,
         userId: ctx.dbEntities.user.user_id,
         vocabularyId: vocabId,
@@ -454,7 +454,7 @@ export async function exerciseConversation(
         goalWord: word.goal,
         nativeWord: word.native,
         sentence,
-      });
+      }));
     }
   }
 

@@ -131,7 +131,7 @@ export async function judgeTranslation(
       {
         role: 'system',
         content:
-          'You are a concise grader. Decide if the learner translation is acceptable. Minor grammar/spelling errors are OK. Take user goal language level into account to not expect too simple or too complex translation. Main goal of this exercise is WORD learning. The word that needs to be learned will be provided into the prompt. Whether that word was correctly translated and used in context is the MAIN thing to consider. Respond with JSON: {"ok": true/false, "feedback": "one sentence"}.',
+          'You are a concise grader. Decide if the learner translation is acceptable. Minor grammar/spelling errors are OK. Take user goal language level into account to not expect too simple or too complex translation. Main goal of this exercise is WORD learning. The word that needs to be learned will be provided into the prompt. Whether that word was correctly translated and used in context is the MAIN thing to consider (if some other words are translated a bit akwardly -- still accept it as a correct answer, just give a feedback). Respond with JSON: {"ok": true/false, "feedback": "one sentence"}.',
       },
       {
         role: 'user',
