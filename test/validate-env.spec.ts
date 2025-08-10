@@ -4,7 +4,7 @@ import { validateEnv } from '../src/helpers/validate-env.js';
 describe('validateEnv', () => {
   it('throws when required env missing', () => {
     expect(() => validateEnv(['MISSING_VAR'])).toThrow(
-      'ERROR: Required variable "MISSING_VAR" is  not specified',
+      'ERROR: Required variable "MISSING_VAR" is not specified',
     );
   });
 

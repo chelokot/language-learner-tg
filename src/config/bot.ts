@@ -1,6 +1,6 @@
 import { conversations } from '@grammyjs/conversations';
-import type { I18n } from '@grammyjs/i18n/dist/source/i18n.js';
-import { Bot as TelegramBot } from 'grammy';
+import type { I18n } from '@grammyjs/i18n';
+import { Bot as TelegramBot, type MiddlewareFn } from 'grammy';
 import type { Transformer } from 'grammy/out/core/client.js';
 
 import { helpController } from '../controllers/help.js';
@@ -29,7 +29,12 @@ function setupControllers(bot: Bot) {
   setupMenu(bot);
 }
 
-export function createBot(database: Database, options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] }) {
+export type CreateBotOptions = {
+  apiTransformers?: Transformer[];
+  preMiddlewares?: MiddlewareFn<CustomContext>[];
+};
+
+export function createBot(database: Database, options?: CreateBotOptions) {
   const localesPath = resolvePath(import.meta.url, '../locales');
   const i18n = initLocaleEngine(localesPath);
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {

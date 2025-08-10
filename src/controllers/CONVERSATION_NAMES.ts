@@ -8,11 +8,9 @@ export const CONVERSATION_NAMES = {
 export type ConversationName = keyof typeof CONVERSATION_NAMES;
 
 /**
- * Получить зарегистрированное имя разговора по ключу.
- * Используйте только эти значения для ctx.conversation.enter!
- *
- * Пример:
- *   ctx.conversation.enter(CONVERSATION_NAMES.createBase)
+ * Use only these constants when entering conversations.
+ * Example:
+ *   ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary)
  */
 export function getConversationName(name: ConversationName): (typeof CONVERSATION_NAMES)[ConversationName] {
   return CONVERSATION_NAMES[name];

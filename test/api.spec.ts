@@ -9,13 +9,8 @@ import { connectToDb } from '../src/config/database.js';
 import { createBot } from '../src/config/bot.js';
 import { webhookCallback } from 'grammy';
 
-// biome-ignore lint/complexity/noUselessCatch:
 async function call() {
-  try {
-    await handler({} as any, {} as any);
-  } catch (e) {
-    throw e;
-  }
+  await handler({} as any, {} as any);
 }
 
 describe('api handler', () => {

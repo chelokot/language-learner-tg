@@ -6,6 +6,7 @@ import type { CustomContext } from '../types/context.js';
  * Returns trimmed message text or empty string if message/text is undefined
  */
 export async function waitText(conv: Conversation<CustomContext, CustomContext>): Promise<string> {
-  const { message } = await conv.wait();
-  return message?.text?.trim() || '';
+  const update = await conv.wait();
+  const text = 'message' in update ? update.message?.text : undefined;
+  return text?.trim() ?? '';
 }
