@@ -302,9 +302,9 @@ export async function addWordConversation(
   }
   const { goal_language: goalLanguage, native_language: nativeLanguage, level } = vocab;
 
+  await ctx.reply(`Type new word in ${goalLanguage}. Send /stop to finish.`);
+  let goal = await waitText(conv);
   while (true) {
-    await ctx.reply(`Type next word in ${goalLanguage}. Send /stop to finish.`);
-    const goal = await waitText(conv);
     if (goal === '/stop') break;
 
     await ctx.reply(`Type its translation in ${nativeLanguage}, or tap /auto to translate automatically.`);
@@ -317,19 +317,17 @@ export async function addWordConversation(
         await ctx.reply(
           `Saved “${goal}” → “${translated}”. Reply /fix to change the translation.\n\nNow enter the next ${goalLanguage} word, or /stop to finish.`,
         );
-        const maybeFix = await waitText(conv);
-        if (maybeFix === '/fix') {
+        goal = await waitText(conv);
+        if (goal === '/fix') {
           await ctx.reply(`Enter the correct translation in ${nativeLanguage}:`);
           native = await waitText(conv);
-          if (native === '/stop') break;
           await conv.external(() => ctx.db.query('UPDATE word SET native=$2 WHERE id=$1', [saved.id, native]));
           await ctx.reply(`Updated: “${goal}” → “${native}”.`);
-        } else if (maybeFix === '/stop') break;
+        } else if (goal === '/stop') break;
         continue;
       } else {
         await ctx.reply('Auto-translation is not available. Please enter the translation manually.');
         native = await waitText(conv);
-        if (native === '/stop') break;
       }
     }
 
@@ -337,6 +335,7 @@ export async function addWordConversation(
 
     await conv.external(() => addWord({ db: ctx.db, vocabularyId, goal, native }));
     await ctx.reply(`Saved “${goal}” → “${native}”. Enter next ${goalLanguage} word, or /stop to finish.`);
+    goal = await waitText(conv);
   }
 
   await conv.external(() => showMenu(ctx));

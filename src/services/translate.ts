@@ -66,7 +66,7 @@ export async function autoTranslate(
       {
         role: 'system',
         content:
-          'You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe. Take user goal language level into account to not propose too simple or too complex translation.',
+          'You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe. Take user goal language level into account to not propose too simple or too complex translation. You can translate into word (preffered) or short phrase if needed.',
       },
       {
         role: 'user',

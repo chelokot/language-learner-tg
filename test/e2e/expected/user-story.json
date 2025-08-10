@@ -62,7 +62,7 @@
   { "role": "user", "text": "tap Add word" },
   {
     "role": "bot",
-    "text": "Type next word in English. Send /stop to finish.",
+    "text": "Type new word in English. Send /stop to finish.",
     "buttons": []
   },
   { "role": "user", "text": "hello" },
@@ -75,11 +75,6 @@
   {
     "role": "bot",
     "text": "Saved “hello” → “привет”. Enter next English word, or /stop to finish.",
-    "buttons": []
-  },
-  {
-    "role": "bot",
-    "text": "Type next word in English. Send /stop to finish.",
     "buttons": []
   },
   { "role": "user", "text": "/stop" },
