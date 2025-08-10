@@ -1,26 +1,30 @@
-import { describe, it, beforeEach, afterEach, expect } from 'vitest';
-import TelegramServer from 'telegram-test-api';
-import { Bot } from 'grammy';
-import { helpController } from '../../src/controllers/help.js';
-import type { CustomContext } from '../../src/types/context.js';
+import { describe, it, beforeEach, afterEach, expect } from "vitest";
+import TelegramServer from "telegram-test-api";
+import { Bot } from "grammy";
+import { helpController } from "../../src/controllers/help.js";
+import type { CustomContext } from "../../src/types/context.js";
 import {
   ChatLogger,
   generatePdf,
   saveJson,
   createLogMiddleware,
   hasConsecutiveUserMessages,
-} from '../helpers/chat-logger.js';
-import fs from 'fs';
+} from "../helpers/chat-logger.js";
+import fs from "fs";
 
 function createBot(apiRoot: string, logger: ChatLogger) {
-  const bot = new Bot<CustomContext>('test-token', { client: { apiRoot } });
+  const bot = new Bot<CustomContext>("test-token", { client: { apiRoot } });
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
     ctx.text = (key: string) =>
-      ctx.reply(key === 'help' ? 'Use /menu to manage vocabularies and start exercises' : key);
+      ctx.reply(
+        key === "help"
+          ? "Use /menu to manage vocabularies and start exercises"
+          : key,
+      );
     ctx.db = { query: async () => ({ rows: [] }) } as any;
     ctx.dbEntities = {
-      user: { user_id: ctx.from.id, name: 'Test', current_vocab_id: null },
+      user: { user_id: ctx.from.id, name: "Test", current_vocab_id: null },
       chat: null,
     };
     await next();
@@ -30,7 +34,7 @@ function createBot(apiRoot: string, logger: ChatLogger) {
   return bot;
 }
 
-describe('help command e2e', () => {
+describe("help command e2e", () => {
   let server: TelegramServer;
   let bot: Bot<CustomContext>;
   const logger = new ChatLogger();
@@ -43,22 +47,25 @@ describe('help command e2e', () => {
   });
 
   afterEach(async () => {
-    await bot.stop();
     await server.stop();
   });
 
-  it('responds with help text', async () => {
-    const client = server.getClient('test-token');
-    await client.sendCommand(client.makeCommand('/help'));
-    logger.logUser('/help');
+  it("responds with help text", async () => {
+    const client = server.getClient("test-token");
+    await client.sendCommand(client.makeCommand("/help"));
+    logger.logUser("/help");
     await server.waitBotMessage();
     const updates = await client.getUpdates();
     const msg = updates.result[0].message;
-    expect(msg.text).toBe('Use /menu to manage vocabularies and start exercises');
+    expect(msg.text).toBe(
+      "Use /menu to manage vocabularies and start exercises",
+    );
     const events = logger.getEvents();
-    generatePdf(events, 'test/e2e/reports/help.pdf');
-    saveJson(events, 'test/e2e/reports/help.json');
-    const expected = JSON.parse(fs.readFileSync('test/e2e/expected/help.json', 'utf8'));
+    generatePdf(events, "test/e2e/reports/help.pdf");
+    saveJson(events, "test/e2e/reports/help.json");
+    const expected = JSON.parse(
+      fs.readFileSync("test/e2e/expected/help.json", "utf8"),
+    );
     expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
   });

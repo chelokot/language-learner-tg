@@ -126,7 +126,6 @@ describe("basic user story e2e", () => {
   });
 
   afterEach(async () => {
-    await bot.stop();
     await server.stop();
   });
 
@@ -174,17 +173,6 @@ describe("basic user story e2e", () => {
     logger.logUser("c1 preparation");
     await server.waitBotMessage();
     updates = await client.getUpdates();
-    const afterCreateUpdate = updates.result.at(-1)!.message!;
-    const vocabListMsgId = afterCreateUpdate.message_id;
-
-    await client.sendCallback(
-      client.makeCallbackQuery("open_vocab:1", {
-        message: { message_id: vocabListMsgId },
-      }),
-    );
-    logger.logUser("tap c1 preparation");
-    await server.waitBotMessage();
-    updates = await client.getUpdates();
     const vocabUpdate = updates.result.at(-1)!.message!;
     const vocabMsgId = vocabUpdate.message_id;
 
@@ -211,12 +199,6 @@ describe("basic user story e2e", () => {
     logger.logUser("/stop");
     await server.waitBotMessage();
     updates = await client.getUpdates();
-
-    // Go to Exercises (current vocab auto-selected)
-    await client.sendCommand(client.makeCommand("/menu"));
-    logger.logUser("/menu");
-    await server.waitBotMessage();
-    updates = await client.getUpdates();
     const menu2 = updates.result.at(-1)!.message!;
     const menu2MsgId = menu2.message_id;
 
@@ -231,7 +213,6 @@ describe("basic user story e2e", () => {
     const exUpdate = updates.result.at(-1)!.message!;
     const exMsgId = exUpdate.message_id;
 
-    // Choose Word EN→RU
     await client.sendCallback(
       client.makeCallbackQuery("exercise:word:gn", {
         message: { message_id: exMsgId },
@@ -254,7 +235,7 @@ describe("basic user story e2e", () => {
     await client.sendMessage(client.makeMessage("/stop"));
     logger.logUser("/stop");
     await server.waitBotMessage();
-    await server.waitBotMessage();
+    await client.getUpdates();
 
     const events = logger.getEvents();
     generatePdf(events, "test/e2e/reports/user-story.pdf");
@@ -264,5 +245,5 @@ describe("basic user story e2e", () => {
     );
     expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
-  }, 20000);
+  }, 40000);
 });

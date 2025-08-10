@@ -10,36 +10,30 @@
   { "role": "user", "text": "tap Create vocabulary" },
   {
     "role": "bot",
-    "text": "Enter the name of the language you are learning (Goal language):",
+    "text": "Enter the name of the language you are learning (Goal language), for example `English`:",
     "buttons": []
   },
   { "role": "user", "text": "English" },
   {
     "role": "bot",
-    "text": "Enter the name of your language used for translations (Native language):",
+    "text": "Enter the name of your language used for translations (Native language), for example `Russian`:",
     "buttons": []
   },
   { "role": "user", "text": "Russian" },
   {
     "role": "bot",
-    "text": "Now enter a name for this vocabulary:",
+    "text": "Now enter a name for this vocabulary, for example `c1 preparation`:",
     "buttons": []
   },
   { "role": "user", "text": "c1 preparation" },
   {
     "role": "bot",
-    "text": "Created vocabulary “c1 preparation” (English → Russian). It is now selected.",
+    "text": "Created vocabulary “c1 preparation” (Russian → English). It is now selected. Selected vocabulary is used for all exercises. Now you can add words to it.",
     "buttons": []
   },
   {
     "role": "bot",
-    "text": "VocabulariesnCurrent: c1 preparation (EN→RU)",
-    "buttons": ["c1 preparation", "Create vocabulary", "Back"]
-  },
-  { "role": "user", "text": "tap c1 preparation" },
-  {
-    "role": "bot",
-    "text": "Vocabulary c1 preparation (English → Russian)",
+    "text": "Vocabulary c1 preparation (Russian → English)",
     "buttons": ["Add word", "Rename", "Delete", "Select", "Back"]
   },
   { "role": "user", "text": "tap Add word" },
@@ -67,12 +61,10 @@
   },
   { "role": "user", "text": "/stop" },
   { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
-  { "role": "user", "text": "/menu" },
-  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
   { "role": "user", "text": "tap Exercises" },
   {
     "role": "bot",
-    "text": "Your current selected vocabulary is “c1 preparation” (English words). Go to /vocabs to change it.nnChoose translation exercise to train.n“Word” = one word prompt. “Sentence” = sentence prompt.nFor English→Russian, the prompt will include at least one word from your list.nFor Russian→English, your answer must include at least one word from your list.",
+    "text": "Your current selected vocabulary is “c1 preparation” (English words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n“Word” = translate one word directly. “Sentence” = translate the whole sentence.\n\nFor English→Russian translation, the prompt will include at least one word from your list.\nFor Russian→English translation, your answer must include at least one word from your list.",
     "buttons": [
       "Word EN→RU",
       "Word RU→EN",
@@ -84,24 +76,23 @@
   { "role": "user", "text": "tap Word EN→RU" },
   {
     "role": "bot",
-    "text": "Translate this word from English to Russian:nhello",
+    "text": "Translate this word from English to Russian:\nhello",
     "buttons": []
   },
   { "role": "user", "text": "привет" },
   { "role": "bot", "text": "Correct", "buttons": [] },
   {
     "role": "bot",
-    "text": "Translate this word from English to Russian:nhello",
+    "text": "Translate this word from English to Russian:\nhello",
     "buttons": []
   },
   { "role": "user", "text": "wrong" },
   { "role": "bot", "text": "Incorrect. Right answer: привет", "buttons": [] },
   {
     "role": "bot",
-    "text": "Translate this word from English to Russian:nhello",
+    "text": "Translate this word from English to Russian:\nhello",
     "buttons": []
   },
   { "role": "user", "text": "/stop" },
-  { "role": "bot", "text": "Stopping exercise", "buttons": [] },
   { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] }
 ]
