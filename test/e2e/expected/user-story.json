@@ -8,7 +8,7 @@
   { "role": "user", "text": "/menu" },
   {
     "role": "bot",
-    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "text": "Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them",
     "buttons": ["Vocabularies", "Exercises"]
   },
   { "role": "user", "text": "tap Vocabularies" },
@@ -85,7 +85,7 @@
   { "role": "user", "text": "/stop" },
   {
     "role": "bot",
-    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "text": "Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them",
     "buttons": ["Vocabularies", "Exercises"]
   },
   { "role": "user", "text": "tap Exercises" },
@@ -123,7 +123,7 @@
   { "role": "user", "text": "/stop" },
   {
     "role": "bot",
-    "text": "Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them",
+    "text": "Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them",
     "buttons": ["Vocabularies", "Exercises"]
   },
   { "role": "user", "text": "tap Vocabularies" },

@@ -37,7 +37,7 @@ export const menuController = new Composer<CustomContext>();
 
 async function showMenu(ctx: CustomContext) {
   await ctx.reply(
-    'Menu\n\nYou can create or select **vocabulary** - list of words to learn.\n\nYou can then choose **exercise** to train them',
+    'Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them',
     { reply_markup: kbMenu(), parse_mode: 'MarkdownV2' },
   );
 }
