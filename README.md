@@ -1,6 +1,6 @@
 # SBSR Telegram Bot
 
-A spaced repetition Telegram bot built in TypeScript. The bot uses serverless functions on Vercel and stores all state in Postgres.  The implementation follows a functional, test‑driven workflow.
+A spaced repetition Telegram bot built in TypeScript. The bot uses serverless functions on Vercel and stores all state in Postgres. The implementation follows a functional, test‑driven workflow.
 
 ## Stack
 
@@ -12,8 +12,10 @@ A spaced repetition Telegram bot built in TypeScript. The bot uses serverless fu
 ## Project structure
 
 - `src/` – bot source code and services
+- `api/` – Vercel serverless entrypoints
+- `migrations/` – SQL migrations managed by Graphile Migrate
 - `docs/` – design documents
-- `test/` – unit tests
+- `test/` – unit and e2e tests
 - `.github/workflows/` – CI configuration
 
 ## Scripts
@@ -31,6 +33,8 @@ The repository follows a strict **test‑driven development** approach.  Every n
 1. Copy `.env.example` to `.env` and fill in the required variables.
 2. `npm install`
 3. `npm test`
+
+Requirements: Node 20+, npm 10+. On Fedora: `sudo dnf install nodejs npm`.
 
 The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when
 setting up the Telegram webhook.

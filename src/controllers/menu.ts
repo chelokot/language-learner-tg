@@ -3,7 +3,7 @@ import type { Conversation } from '@grammyjs/conversations';
 import { Composer } from 'grammy';
 import { waitText } from '../helpers/wait-text.js';
 import { checkTranslation } from '../services/exercise.js';
-import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
+import { setCurrentVocabulary } from '../services/user.js';
 import {
   createVocabulary,
   deleteVocabulary,

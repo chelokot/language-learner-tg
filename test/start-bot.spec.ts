@@ -13,10 +13,10 @@ vi.mock('grammy', () => ({
   },
 }));
 vi.mock('@grammyjs/conversations', () => ({ conversations: () => () => undefined }));
-vi.mock('../src/controllers/help.js', () => ({ helpController: {} }));
+vi.mock('../src/controllers/help.js', () => ({ helpController: { middleware: () => () => undefined } }));
 vi.mock('../src/controllers/menu.js', () => ({ setupMenu: () => undefined }));
-vi.mock('../src/controllers/start.js', () => ({ startController: {} }));
-vi.mock('../src/controllers/stop.js', () => ({ stopController: {} }));
+vi.mock('../src/controllers/start.js', () => ({ startController: { middleware: () => () => undefined } }));
+vi.mock('../src/controllers/stop.js', () => ({ stopController: { middleware: () => () => undefined } }));
 vi.mock('../src/config/extend-context.js', () => ({ createExtendContextMiddleware: () => () => undefined }));
 vi.mock('../src/config/locale-engine.js', () => ({ initLocaleEngine: () => ({ middleware: () => () => undefined }) }));
 
