@@ -422,13 +422,13 @@ export async function exerciseConversation(
             correct: result.ok,
           }),
         );
-        await ctx.reply(result.ok ? `Correct. ${result.feedback}` : `Not quite. ${result.feedback}`);
+        await ctx.reply(result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`);
       } else {
         sentence = await conv.external(() =>
           generateSentenceWithTerm(nativeLanguage, word.native, 'native', level, examples),
         );
         await ctx.reply(
-          `Translate this sentence from ${nativeLanguage} to ${goalLanguage}:\n${sentence}\nRemember to include at least one word from your list.`,
+          `Translate this sentence from ${nativeLanguage} to ${goalLanguage}:\n\n${sentence}\n\nRemember to include at least one word from your list.`,
         );
         const answer = await waitText(conv);
         if (answer === '/stop') break;
@@ -443,7 +443,7 @@ export async function exerciseConversation(
             correct: result.ok,
           }),
         );
-        await ctx.reply(result.ok ? `Correct. ${result.feedback}` : `Not quite. ${result.feedback}`);
+        await ctx.reply(result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`);
       }
       await saveSentenceExample({
         db: ctx.db,
