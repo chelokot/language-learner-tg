@@ -122,7 +122,7 @@ async function showExercises(ctx: CustomContext) {
     current = first;
   }
   await ctx.reply(
-    `Your current selected vocabulary is “${current.name}” (${current.goal_language} words). Go to /vocabs to change it.\n\nChoose translation exercise to train.\n\n**“Word”** = translate one word directly.\n**“Sentence”** = translate the whole sentence.\n\n**${current.goal_language}→${current.native_language}** task includes at least one word from your list.\n**${current.native_language}→${current.goal_language}** task requires your answer to include at least one word from your list.`,
+    `Your current selected vocabulary is “${current.name}” \\(${current.goal_language} words\\)\\. Go to /vocabs to change it\\.\n\nChoose translation exercise to train\\.\n\n**“Word”** \\= translate one word directly\\.\n**“Sentence”** \\= translate the whole sentence\\.\n\n**${current.goal_language}→${current.native_language}** task includes at least one word from your list\\.\n**${current.native_language}→${current.goal_language}** task requires your answer to include at least one word from your list\\.`,
     { reply_markup: kbExercisesForVocab(current), parse_mode: 'MarkdownV2' },
   );
 }
