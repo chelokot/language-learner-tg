@@ -34,7 +34,7 @@ export async function chat(
       model,
       messages,
       reasoning: { effort: opts?.reasoningEffort ?? 'low' },
-      verbosity: opts?.verbosity ?? 'low',
+      text: { verbosity: opts?.verbosity ?? 'low' },
     }),
   });
 
