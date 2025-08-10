@@ -6,7 +6,7 @@ export const kbMenu = () =>
 
 export const kbVocabularies = (vocabularies: Vocabulary[]) => {
   const kb = new InlineKeyboard();
-  vocabularies.forEach(v => kb.text(v.name, `open_vocab:${v.id}`).row());
+  vocabularies.forEach(v => kb.text(`${v.name}`, `open_vocab:${v.id}`).row());
   return kb.text('Create vocabulary', 'create_vocab').row().text('Back', 'menu');
 };
 
@@ -22,5 +22,21 @@ export const kbVocabulary = (id: number) =>
     .row()
     .text('Back', 'back_to_vocabularies');
 
-export const kbExercises = () =>
-  new InlineKeyboard().text('Word translation', 'exercise_word').row().text('Back', 'menu');
+function dir(a: string, b: string) {
+  return `${a}→${b}`;
+}
+
+export const kbExercisesForVocab = (v: Vocabulary) => {
+  const g = (v.goal_code || v.goal_language).toUpperCase();
+  const n = (v.native_code || v.native_language).toUpperCase();
+  return new InlineKeyboard()
+    .text(`Word ${dir(g, n)}`, 'exercise:word:gn')
+    .row()
+    .text(`Word ${dir(n, g)}`, 'exercise:word:ng')
+    .row()
+    .text(`Sentence ${dir(g, n)}`, 'exercise:sentence:gn')
+    .row()
+    .text(`Sentence ${dir(n, g)}`, 'exercise:sentence:ng')
+    .row()
+    .text('Back', 'menu');
+};

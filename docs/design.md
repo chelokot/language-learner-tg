@@ -1,6 +1,6 @@
 # State-Based Spaced Repetition Bot
 
-This document describes the architecture of the **State‑Based Spaced Repetition (SBSR)** Telegram bot.  The bot is a purely functional data‑flow running on Vercel serverless functions.  All state lives in Postgres; the bot itself remains stateless between invocations.  End users interact with the bot over Telegram and control the pace by pressing the **Next** button after each answer.  No time‑based scheduling is involved—only the numerical position counter stored in the database.
+This document describes the architecture of the **State-Based Spaced Repetition (SBSR)** Telegram bot. The bot is a purely functional data-flow running on Vercel serverless functions. All state lives in Postgres; the bot itself remains stateless between invocations. End users interact with the bot over Telegram and control the pace by pressing the **Next** button after each answer. No time-based scheduling is involved—only the numerical position counter stored in the database.
 
 ## Goals
 
@@ -10,11 +10,12 @@ This document describes the architecture of the **State‑Based Spaced Repetitio
 
 ## Tech stack
 
-| Layer            | Choice                                   |
-|------------------|-------------------------------------------|
-| Runtime          | Vercel Functions (Node 20)               |
-| Bot framework    | [ts-tg-bot template](https://github.com/ExposedCat/ts-tg-bot) with grammY |
-| Database         | Vercel Postgres via `@vercel/postgres`   |
+| Layer          | Choice                                                                              |
+| -------------- | ----------------------------------------------------------------------------------- |
+| Runtime        | Vercel Functions (Node 20)                                                          |
+| Bot framework  | [ts-tg-bot template](https://github.com/ExposedCat/ts-tg-bot) with grammY           |
+| Database       | Vercel Postgres via `@vercel/postgres`                                              |
+| LLM            | OpenRouter API (for auto-translation, language code inference, sentence generation) |
 
 All code is written in TypeScript with ES modules.
 
@@ -35,14 +36,18 @@ CREATE TABLE chat (
 CREATE TABLE vocabulary (
   id SERIAL PRIMARY KEY,
   owner_id BIGINT REFERENCES app_user(user_id),
-  name TEXT NOT NULL
+  name TEXT NOT NULL,
+  goal_language TEXT NOT NULL,      -- e.g. "English"
+  native_language TEXT NOT NULL,    -- e.g. "Ukrainian"
+  goal_code TEXT,                   -- short code e.g. "EN"
+  native_code TEXT                  -- short code e.g. "UK"
 );
 
 CREATE TABLE word (
   id SERIAL PRIMARY KEY,
   vocabulary_id INTEGER REFERENCES vocabulary(id),
-  front TEXT NOT NULL,
-  back TEXT NOT NULL
+  front TEXT NOT NULL,              -- term in Goal language
+  back TEXT NOT NULL                -- translation in Native language
 );
 
 CREATE TABLE exercise_state (
@@ -62,6 +67,8 @@ CREATE TABLE score (
 );
 ```
 
+`front` is always **Goal**; `back` is always **Native**. All UI copy should prefer the actual language names/codes (e.g. “English→Ukrainian”) over generic “Goal/Native”.
+
 ## SBSR algorithm
 
 1. The client requests `/next`.
@@ -71,12 +78,14 @@ CREATE TABLE score (
 5. `calcNextSlot` computes `floor(position + score)` and shifts upward until no collision.
 6. The user's `position` field is increased by one regardless of correctness.
 
-No time-based scheduling is used: `position` is the only counter.  The helper functions `updateScore` and `calcNextSlot` are implemented in `src/services/sbsr.ts` and covered by unit tests.
+## LLM usage
+* **Auto-translation** when a user taps `/auto`.
+* **Language code inference** (short codes like EN/RU/UK) during vocabulary creation, with heuristics fallback if no API key is configured.
+* **Sentence generation & judging** for sentence exercises. If the API key is missing, we fall back to deterministic templates and basic checks so tests remain reliable.
 
 ## Testing approach
-
 * Unit tests with **Vitest** cover pure functions and helpers.
-* Integration tests use **telegram-test-api** with Postgres and Redis containers.
+* Integration tests use **telegram-test-api**; the e2e script avoids reliance on external LLMs.
 * Every feature starts with a failing test committed separately to demonstrate TDD.
 * CI runs `npm test` on every push and pull request.
 

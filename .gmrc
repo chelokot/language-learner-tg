@@ -87,7 +87,7 @@
     // "afterReset.sql",
     // { "_": "command", "command": "graphile-worker --schema-only" },
   ],
- 
+
   /*
    * afterAllMigrations: actions executed once all migrations are complete.
    */

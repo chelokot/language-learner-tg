@@ -1,6 +1,6 @@
 import { conversations } from '@grammyjs/conversations';
 import type { I18n } from '@grammyjs/i18n';
-import { Bot as TelegramBot, type MiddlewareFn } from 'grammy';
+import { type MiddlewareFn, Bot as TelegramBot } from 'grammy';
 import type { Transformer } from 'grammy/out/core/client.js';
 
 import { helpController } from '../controllers/help.js';
