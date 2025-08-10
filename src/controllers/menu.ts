@@ -39,6 +39,10 @@ import {
   inferLanguageCode,
   judgeTranslation,
 } from "../services/translate.js";
+import {
+  getRecentSentenceExamples,
+  saveSentenceExample,
+} from "../services/sentence-log.js";
 
 export const menuController = new Composer<CustomContext>();
 
@@ -471,9 +475,25 @@ export async function exerciseConversation(
         );
       }
     } else {
+      const examples = await getRecentSentenceExamples({
+        db: ctx.db,
+        userId: ctx.dbEntities.user.user_id,
+        vocabularyId: vocabId,
+        exerciseKind: "sentence",
+        direction: dir,
+        goalWord: word.goal,
+        nativeWord: word.native,
+      });
+      let sentence = "";
       if (dir === "gn") {
-        const sentence = await conv.external(() =>
-          generateSentenceWithTerm(goalLanguage, word.goal, "goal", level),
+        sentence = await conv.external(() =>
+          generateSentenceWithTerm(
+            goalLanguage,
+            word.goal,
+            "goal",
+            level,
+            examples,
+          ),
         );
         await ctx.reply(
           `Translate this sentence from ${goalLanguage} to ${nativeLanguage}:\n${sentence}`,
@@ -505,12 +525,13 @@ export async function exerciseConversation(
             : `Not quite. ${result.feedback}`,
         );
       } else {
-        const sentence = await conv.external(() =>
+        sentence = await conv.external(() =>
           generateSentenceWithTerm(
             nativeLanguage,
             word.native,
             "native",
             level,
+            examples,
           ),
         );
         await ctx.reply(
@@ -543,6 +564,16 @@ export async function exerciseConversation(
             : `Not quite. ${result.feedback}`,
         );
       }
+      await saveSentenceExample({
+        db: ctx.db,
+        userId: ctx.dbEntities.user.user_id,
+        vocabularyId: vocabId,
+        exerciseKind: "sentence",
+        direction: dir,
+        goalWord: word.goal,
+        nativeWord: word.native,
+        sentence,
+      });
     }
   }
 

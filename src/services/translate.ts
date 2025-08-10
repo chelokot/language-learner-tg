@@ -86,11 +86,18 @@ export async function generateSentenceWithTerm(
   targetTerm: string,
   direction: "goal" | "native",
   level: string,
+  previousExamples: string[],
 ): Promise<string> {
   const fallback =
     direction === "goal"
       ? `This simple sentence uses the word "${targetTerm}".`
       : `Це просте речення використовує слово "${targetTerm}".`;
+
+  const examplesText =
+    previousExamples && previousExamples.length
+      ? `Here are recent examples previously used. Do NOT repeat their ideas or wording; produce something unique and DIFFERENT in theme/structure/vocab:\n` +
+        previousExamples.map((s, i) => `${i + 1}. ${s}`).join("\n")
+      : "";
 
   try {
     const content = await chat([
@@ -101,7 +108,7 @@ export async function generateSentenceWithTerm(
       },
       {
         role: "user",
-        content: `Goal language level: ${level}.\nLanguage: ${language}\nTarget term to include: ${targetTerm}`,
+        content: `${examplesText}\n\nGoal language level: ${level}.\nLanguage: ${language}\nTarget term to include: ${targetTerm}`,
       },
     ]);
     return content.trim();
