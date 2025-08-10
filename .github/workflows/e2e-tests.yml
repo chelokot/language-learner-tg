@@ -1,4 +1,4 @@
-name: E2E
+name: E2E tests
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        shard: ['1/1']
+        shard: ["1/1"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -1,4 +1,4 @@
-name: Mutation
+name: Mutation tests
 
 on:
   push:
