@@ -1,8 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("../../src/services/llm.js", () => ({
-  chat: vi.fn().mockRejectedValue(new Error("no llm")),
-}));
+vi.mock("../../src/services/llm.js", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  const { LlmUnavailableError } = actual;
+  return {
+    LlmUnavailableError,
+    chat: vi.fn().mockRejectedValue(new LlmUnavailableError("no llm")),
+  };
+});
 
 import { judgeTranslation } from "../../src/services/translate.js";
 

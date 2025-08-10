@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/services/llm.js", () => {
-  class LlmUnavailableError extends Error {}
+vi.mock("../../src/services/llm.js", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  const { LlmUnavailableError } = actual;
   return {
     LlmUnavailableError,
     chat: vi.fn().mockRejectedValue(new LlmUnavailableError("no llm")),

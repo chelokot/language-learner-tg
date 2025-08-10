@@ -268,7 +268,7 @@ export async function addWordConversation(
   let lastWordId: number | null = null;
 
   while (true) {
-    await ctx.reply(`Type a word in ${g}. Send /stop to finish.`);
+    await ctx.reply(`Type next word in ${g}. Send /stop to finish.`);
     const front = await waitText(conversation);
     if (front === "/stop") break;
 
@@ -288,7 +288,6 @@ export async function addWordConversation(
         });
         lastWordId = saved.id;
         await ctx.reply(`Saved “${front}” → “${translated}”. Reply /fix to change the translation.
-
 
 Now enter the next ${g} word, or /stop to finish.`);
         const maybeFix = await waitText(conversation);
