@@ -39,8 +39,15 @@
   },
   {
     "role": "bot",
-    "text": "Vocabulary c1 preparation (Russian → English)",
-    "buttons": ["Add word", "Rename", "Delete", "Select", "Back"]
+    "text": "Vocabulary c1 preparation (Russian → English)\n\nTotal amount of words: 0\n\nBest learned words:\n\nLeast learned words:",
+    "buttons": [
+      "Add word",
+      "Delete words…",
+      "Select Vocabulary",
+      "Rename Vocabulary",
+      "Delete Vocabulary",
+      "Back"
+    ]
   },
   { "role": "user", "text": "tap Add word" },
   {

@@ -13,15 +13,24 @@ import {
   getVocabulary,
   listVocabularies,
   renameVocabulary,
-  type Vocabulary,
+  Vocabulary,
 } from "../services/vocabulary.js";
-import { addWord, getRandomWord } from "../services/word.js";
+import {
+  addWord,
+  getRandomWord,
+  countWordsInVocabulary,
+  listWordStatsForVocabulary,
+  listWordsForVocabulary,
+  deleteWordsByTexts,
+  updateWordAnswerStats,
+} from "../services/word.js";
 import type { CustomContext } from "../types/context.js";
 import {
   kbExercisesForVocab,
   kbMenu,
   kbVocabularies,
   kbVocabulary,
+  kbConfirmDeleteVocabulary,
 } from "../ui/keyboards.js";
 import { CONVERSATION_NAMES } from "./CONVERSATION_NAMES.js";
 import {
@@ -68,8 +77,41 @@ async function showVocabularies(ctx: CustomContext) {
 async function showVocabulary(ctx: CustomContext, id: number) {
   const vocab = await getVocabulary({ db: ctx.db, vocabularyId: id });
   if (!vocab) return;
+
+  const total = await countWordsInVocabulary({ db: ctx.db, vocabularyId: id });
+  const stats = await listWordStatsForVocabulary({
+    db: ctx.db,
+    vocabularyId: id,
+  });
+
+  const top = [...stats]
+    .sort((a, b) => b.score - a.score || a.front.localeCompare(b.front))
+    .slice(0, 5);
+
+  const bottom = [...stats]
+    .sort((a, b) => a.score - b.score || a.front.localeCompare(b.front))
+    .slice(0, 5);
+
+  const fmt = (w: (typeof stats)[number], i: number) =>
+    `${i}. ${w.front}/${w.back} - ${w.correct} correct, ${w.mistakes} mistakes`;
+
   const pair = `${vocab.native_language} → ${vocab.goal_language}`;
-  await ctx.reply(`Vocabulary ${vocab.name} (${pair})`, {
+  const lines: string[] = [
+    `Vocabulary ${vocab.name} (${pair})`,
+    ``,
+    `Total amount of words: ${total}`,
+  ];
+
+  lines.push(
+    ``,
+    `Best learned words:`,
+    ...top.map((w, i) => fmt(w, i + 1)),
+    ``,
+    `Least learned words:`,
+    ...bottom.map((w, i) => fmt(w, i + 1)),
+  );
+
+  await ctx.reply(lines.join("\n"), {
     reply_markup: kbVocabulary(id),
   });
 }
@@ -105,7 +147,7 @@ async function showExercises(ctx: CustomContext) {
   );
 }
 
-/\*\* Always ACK callbacks first — this prevents flakiness in telegram-test-api. \*/;
+/** Always ACK callbacks first — this prevents flakiness in telegram-test-api. */
 async function ack(ctx: CustomContext) {
   try {
     await ctx.answerCallbackQuery();
@@ -153,6 +195,24 @@ menuController.callbackQuery(/rename_vocab:(\d+)/, async (ctx) => {
     Number(ctx.match[1]),
   );
 });
+
+menuController.callbackQuery(/delete_words:(\d+)/, async (ctx) => {
+  await ack(ctx);
+  await ctx.conversation.enter(
+    CONVERSATION_NAMES.deleteWords,
+    Number(ctx.match[1]),
+  );
+});
+
+menuController.callbackQuery(/delete_vocab_confirm:(\d+)/, async (ctx) => {
+  await ack(ctx);
+  const id = Number(ctx.match[1]);
+  await ctx.reply(
+    `Are you sure you want to delete this vocabulary? This cannot be undone.`,
+    { reply_markup: kbConfirmDeleteVocabulary(id) },
+  );
+});
+
 menuController.callbackQuery(/delete_vocab:(\d+)/, async (ctx) => {
   await ack(ctx);
   await deleteVocabulary({
@@ -162,6 +222,7 @@ menuController.callbackQuery(/delete_vocab:(\d+)/, async (ctx) => {
   });
   await showVocabularies(ctx);
 });
+
 menuController.callbackQuery(/select_vocab:(\d+)/, async (ctx) => {
   await ack(ctx);
   await setCurrentVocabulary({
@@ -190,12 +251,12 @@ export async function createVocabularyConversation(
   ctx: CustomContext,
 ) {
   await ctx.reply(
-    "Enter the name of the language you are learning (Goal language), for example `English`:",
+    "Enter the name of the language you are learning \\(Goal language\\), for example `English`:",
     { parse_mode: "MarkdownV2" },
   );
   const goalLanguage = await waitText(conversation);
   await ctx.reply(
-    "Enter the name of your language used for translations (Native language), for example `Russian`:",
+    "Enter the name of your language used for translations \\(Native language\\), for example `Russian`:",
     { parse_mode: "MarkdownV2" },
   );
   const nativeLanguage = await waitText(conversation);
@@ -363,6 +424,11 @@ export async function exerciseConversation(
           break;
         }
         const ok = checkTranslation(word.back, answer);
+        await updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: ok,
+        });
         await ctx.reply(
           ok ? "Correct" : `Incorrect. Right answer: ${word.back}`,
         );
@@ -373,6 +439,11 @@ export async function exerciseConversation(
           break;
         }
         const ok = checkTranslation(word.front, answer);
+        await updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: ok,
+        });
         await ctx.reply(
           ok ? "Correct" : `Incorrect. Right answer: ${word.front}`,
         );
@@ -388,6 +459,11 @@ export async function exerciseConversation(
           break;
         }
         const result = await judgeTranslation(sentence, answer, g, n);
+        await updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: result.ok,
+        });
         await ctx.reply(
           result.ok
             ? `Correct. ${result.feedback}`
@@ -409,6 +485,11 @@ export async function exerciseConversation(
           g,
           word.front,
         );
+        await updateWordAnswerStats({
+          db: ctx.db,
+          wordId: word.id,
+          correct: result.ok,
+        });
         await ctx.reply(
           result.ok
             ? `Correct. ${result.feedback}`
@@ -420,10 +501,68 @@ export async function exerciseConversation(
   await showMenu(ctx);
 }
 
+export async function deleteWordsConversation(
+  conversation: Conversation<CustomContext, CustomContext>,
+  ctx: CustomContext,
+  vocabularyId: number,
+) {
+  const words = await listWordsForVocabulary({ db: ctx.db, vocabularyId });
+  if (words.length === 0) {
+    await ctx.reply("This vocabulary has no words yet.");
+    return;
+  }
+
+  const list = words.map((w) => `\`${w.front}\`/\`${w.back}\``).join("\n");
+  await ctx.reply(
+    [
+      "Current words \\(tap to copy\\):",
+      "",
+      list,
+      "",
+      "Send the words to delete \\(by their original form or translation\\).",
+      "Separate them by spaces or commas. Examples:",
+      "`дом, кот,  apple`",
+      "`дом кот apple`",
+    ].join("\n"),
+    { parse_mode: "MarkdownV2" },
+  );
+
+  const raw = await waitText(conversation);
+  const tokens = raw
+    .split(/[,\s]+/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    await ctx.reply("Nothing to delete.");
+    await showVocabulary(ctx, vocabularyId);
+    return;
+  }
+
+  const result = await deleteWordsByTexts({
+    db: ctx.db,
+    vocabularyId,
+    tokens,
+  });
+
+  if (result.deleted.length === 0) {
+    await ctx.reply("No matching words found.");
+  } else {
+    const deletedList = result.deleted
+      .map((w) => `• ${w.front} / ${w.back}`)
+      .join("\n");
+    await ctx.reply(
+      `Deleted ${result.deleted.length} word(s):\n${deletedList}`,
+    );
+  }
+  await showVocabulary(ctx, vocabularyId);
+}
+
 export function setupMenu(bot: any) {
   bot.use(createConversation(createVocabularyConversation));
   bot.use(createConversation(renameVocabularyConversation));
   bot.use(createConversation(addWordConversation));
   bot.use(createConversation(exerciseConversation));
+  bot.use(createConversation(deleteWordsConversation));
   bot.use(menuController);
 }
