@@ -36,10 +36,11 @@ describe("vocabulary service", () => {
       nativeLanguage: "Russian",
       goalCode: "EN",
       nativeCode: "RU",
+      level: "c1",
     });
     expect(db.query).toHaveBeenCalledWith(
-      "INSERT INTO vocabulary (owner_id, name, goal_language, native_language, goal_code, native_code) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, owner_id, name, goal_language, native_language, goal_code, native_code",
-      [10, "base", "English", "Russian", "EN", "RU"],
+      "INSERT INTO vocabulary (owner_id, name, goal_language, native_language, goal_code, native_code, level) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, owner_id, name, goal_language, native_language, goal_code, native_code, level",
+      [10, "base", "English", "Russian", "EN", "RU", "c1"],
     );
     expect(base).toEqual({
       id: 1,
@@ -111,7 +112,7 @@ describe("vocabulary service", () => {
     });
     const bases = await listVocabularies({ db, ownerId: 10 });
     expect(db.query).toHaveBeenCalledWith(
-      "SELECT id, owner_id, name, goal_language, native_language, goal_code, native_code FROM vocabulary WHERE owner_id=$1",
+      "SELECT id, owner_id, name, goal_language, native_language, goal_code, native_code, level FROM vocabulary WHERE owner_id=$1",
       [10],
     );
     expect(bases).toEqual([

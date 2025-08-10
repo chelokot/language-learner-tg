@@ -46,8 +46,8 @@ CREATE TABLE vocabulary (
 CREATE TABLE word (
   id SERIAL PRIMARY KEY,
   vocabulary_id INTEGER REFERENCES vocabulary(id),
-  front TEXT NOT NULL,              -- term in Goal language
-  back TEXT NOT NULL                -- translation in Native language
+  goal TEXT NOT NULL,               -- term in Goal language
+  native TEXT NOT NULL              -- translation in Native language
 );
 
 CREATE TABLE exercise_state (
@@ -67,7 +67,7 @@ CREATE TABLE score (
 );
 ```
 
-`front` is always **Goal**; `back` is always **Native**. All UI copy should prefer the actual language names/codes (e.g. “English→Ukrainian”) over generic “Goal/Native”.
+All UI copy should prefer the actual language names/codes (e.g. “English→Ukrainian”) over generic “Goal/Native”.
 
 ## SBSR algorithm
 

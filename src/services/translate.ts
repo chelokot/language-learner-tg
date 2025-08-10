@@ -59,17 +59,18 @@ export async function autoTranslate(
   text: string,
   fromLang: string,
   toLang: string,
+  level: string,
 ): Promise<string | null> {
   try {
     const content = await chat([
       {
         role: "system",
         content:
-          "You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe.",
+          "You are a precise translator. Output only the translation with no quotes, no extra punctuation, no explanations. Be very clever. Do not answer with very stupid and generic translation, find a very that is very good by meaning and vibe. Take user goal language level into account to not propose too simple or too complex translation.",
       },
       {
         role: "user",
-        content: `Translate from ${fromLang} to ${toLang}:\n\n${text}`,
+        content: `Goal language level: ${level}.\n\nTranslate from ${fromLang} to ${toLang}:\n\n${text}`,
       },
     ]);
     return content.replace(/^["“”]+|["“”]+$/g, "").trim();
@@ -84,6 +85,7 @@ export async function generateSentenceWithTerm(
   language: string,
   targetTerm: string,
   direction: "goal" | "native",
+  level: string,
 ): Promise<string> {
   const fallback =
     direction === "goal"
@@ -95,11 +97,11 @@ export async function generateSentenceWithTerm(
       {
         role: "system",
         content:
-          "Write one short, natural sentence in the requested language. The sentence MUST include the given target term exactly once (or its inflected form)",
+          "Write one short, natural sentence in the requested language. The sentence MUST include the given target term exactly once (or its inflected form). It must be interesting an unique. Take user goal language level into account to not propose too simple or too complex translation.",
       },
       {
         role: "user",
-        content: `Language: ${language}\nTarget term to include: ${targetTerm}`,
+        content: `Goal language level: ${level}.\nLanguage: ${language}\nTarget term to include: ${targetTerm}`,
       },
     ]);
     return content.trim();
@@ -114,34 +116,22 @@ export async function judgeTranslation(
   userAnswer: string,
   fromLang: string,
   toLang: string,
-  mustContain?: string,
+  goalWord: string,
+  nativeWord: string,
+  level: string,
 ): Promise<{ ok: boolean; feedback: string }> {
-  // basic quick check: if mustContain is provided, enforce it first
-  if (
-    mustContain &&
-    !new RegExp(`b${escapeRegExp(mustContain)}b`, "i").test(userAnswer)
-  ) {
-    return {
-      ok: false,
-      feedback: `Your answer must include the word “${mustContain}”.`,
-    };
-  }
-
   try {
-    const content = await chat(
-      [
-        {
-          role: "system",
-          content:
-            'You are a concise grader. Decide if the learner translation is acceptable. Minor grammar/spelling errors are OK. Respond with JSON: {"ok": true/false, "feedback": "one sentence"}.',
-        },
-        {
-          role: "user",
-          content: `Source (${fromLang}): ${source}\nLearner answer (${toLang}): ${userAnswer}`,
-        },
-      ],
-      { temperature: 0 },
-    );
+    const content = await chat([
+      {
+        role: "system",
+        content:
+          'You are a concise grader. Decide if the learner translation is acceptable. Minor grammar/spelling errors are OK. Take user goal language level into account to not expect too simple or too complex translation. Main goal of this exercise is WORD learning. The word that needs to be learned will be provided into the prompt. Whether that word was correctly translated and used in context is the MAIN thing to consider. Respond with JSON: {"ok": true/false, "feedback": "one sentence"}.',
+      },
+      {
+        role: "user",
+        content: `Goal language level: ${level}.\nWord being trained: ${nativeWord}->${goalWord}. It's important for user to learn ${goalWord} word, ${nativeWord} is allowed to be replaced with close synonym, but ${goalWord} is not.\nSource (${fromLang}): ${source}\nLearner answer (${toLang}): ${userAnswer}`,
+      },
+    ]);
     const parsed = safeParseJson(content);
     if (
       typeof parsed?.ok === "boolean" &&
@@ -158,8 +148,16 @@ export async function judgeTranslation(
   }
 
   // Heuristic fallback: accept if non-empty, not identical to source
-  const ok =
-    userAnswer.trim().length > 0 && userAnswer.trim() !== source.trim();
+  let ok = userAnswer.trim().length > 0 && userAnswer.trim() !== source.trim();
+  // if original contains goal word, check if answer contains native word and vice versa
+  const goalWordRegex = new RegExp(escapeRegExp(goalWord), "i");
+  const nativeWordRegex = new RegExp(escapeRegExp(nativeWord), "i");
+  if (
+    (source.match(goalWordRegex) && !userAnswer.match(nativeWordRegex)) ||
+    (source.match(nativeWordRegex) && !userAnswer.match(goalWordRegex))
+  ) {
+    ok = false;
+  }
   return {
     ok,
     feedback: ok ? "Looks fine." : "That does not seem correct. Try again.",

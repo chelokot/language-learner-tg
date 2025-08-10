@@ -16,13 +16,13 @@
   { "role": "user", "text": "tap Create vocabulary" },
   {
     "role": "bot",
-    "text": "Enter the name of the language you are learning (Goal language), for example `English`:",
+    "text": "Enter the name of the language you are learning \\(Goal language\\), for example `English`:",
     "buttons": []
   },
   { "role": "user", "text": "English" },
   {
     "role": "bot",
-    "text": "Enter the name of your language used for translations (Native language), for example `Russian`:",
+    "text": "Enter the name of your language used for translations \\(Native language\\), for example `Russian`:",
     "buttons": []
   },
   { "role": "user", "text": "Russian" },
@@ -34,12 +34,18 @@
   { "role": "user", "text": "c1 preparation" },
   {
     "role": "bot",
+    "text": "What target level is this vocabulary for? Answer in any format, for example: `c1`, `intermediate`, or `I am total beginner`:",
+    "buttons": []
+  },
+  { "role": "user", "text": "c1" },
+  {
+    "role": "bot",
     "text": "Created vocabulary “c1 preparation” (Russian → English). It is now selected. Selected vocabulary is used for all exercises. Now you can add words to it.",
     "buttons": []
   },
   {
     "role": "bot",
-    "text": "Vocabulary c1 preparation (Russian → English)\n\nTotal amount of words: 0\n\nBest learned words:\n\nLeast learned words:",
+    "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 0\n\nBest learned words:\n\nLeast learned words:",
     "buttons": [
       "Add word",
       "Delete words…",
@@ -107,5 +113,24 @@
     "buttons": []
   },
   { "role": "user", "text": "/stop" },
-  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] }
+  { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
+  { "role": "user", "text": "tap Vocabularies" },
+  {
+    "role": "bot",
+    "text": "Vocabularies\nCurrent: c1 preparation (RU→EN)",
+    "buttons": ["c1 preparation", "Create vocabulary", "Back"]
+  },
+  { "role": "user", "text": "tap c1 preparation" },
+  {
+    "role": "bot",
+    "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 1\n\nBest learned words:\n1. hello/привет - 1 correct, 1 mistakes\n\nLeast learned words:\n1. hello/привет - 1 correct, 1 mistakes",
+    "buttons": [
+      "Add word",
+      "Delete words…",
+      "Select Vocabulary",
+      "Rename Vocabulary",
+      "Delete Vocabulary",
+      "Back"
+    ]
+  }
 ]

@@ -12,7 +12,11 @@ export class LlmUnavailableError extends Error {}
 
 export async function chat(
   messages: ChatMessage[],
-  opts?: { model?: string; temperature?: number },
+  opts?: {
+    model?: string;
+    reasoningEffort?: "low" | "medium" | "high"; // OpenRouter reasoning control
+    verbosity?: "low" | "medium" | "high"; // OpenRouter verbosity control
+  },
 ): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new LlmUnavailableError("OPENROUTER_API_KEY is not set");
@@ -28,8 +32,9 @@ export async function chat(
     },
     body: JSON.stringify({
       model,
-      temperature: opts?.temperature ?? 0,
       messages,
+      reasoning: { effort: opts?.reasoningEffort ?? "low" },
+      verbosity: opts?.verbosity ?? "low",
     }),
   });
 
