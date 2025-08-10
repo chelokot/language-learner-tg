@@ -132,10 +132,15 @@ describe("basic user story e2e", () => {
   it("creates vocabulary with languages, adds word and performs exercise", async () => {
     const client = server.getClient("test-token");
 
+    await client.sendCommand(client.makeCommand("/start"));
+    logger.logUser("/start");
+    await server.waitBotMessage();
+    let updates = await client.getUpdates();
+
     await client.sendCommand(client.makeCommand("/menu"));
     logger.logUser("/menu");
     await server.waitBotMessage();
-    let updates = await client.getUpdates();
+    updates = await client.getUpdates();
     const menuUpdate = updates.result[0].message!;
     const menuMsgId = menuUpdate.message_id;
 

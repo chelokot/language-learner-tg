@@ -1,4 +1,10 @@
 [
+  { "role": "user", "text": "/start" },
+  {
+    "role": "bot",
+    "text": "Hello there, TestName! Use /menu to manage vocabularies and start exercises",
+    "buttons": []
+  },
   { "role": "user", "text": "/menu" },
   { "role": "bot", "text": "Menu", "buttons": ["Vocabularies", "Exercises"] },
   { "role": "user", "text": "tap Vocabularies" },
