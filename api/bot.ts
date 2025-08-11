@@ -14,7 +14,7 @@ async function initHandler() {
     }
     const db = await connectToDb();
     const bot = createBot(db);
-    handler = webhookCallback(bot, 'http');
+    handler = webhookCallback(bot, 'http', 'return', 25_000);
   }
   return handler;
 }

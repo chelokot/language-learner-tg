@@ -1,4 +1,4 @@
-name: Mutation
+name: Migrations tests
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  mutation:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,8 +14,4 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run mutation
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mutation-report
-          path: reports/mutation
+      - run: npm run test:migrations

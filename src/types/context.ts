@@ -13,6 +13,8 @@ export interface Custom<C extends Context> {
     chat: Chat | null;
   };
 
+  seen: Record<string, true>;
+
   db: Database;
 }
 

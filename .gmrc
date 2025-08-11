@@ -87,7 +87,7 @@
     // "afterReset.sql",
     // { "_": "command", "command": "graphile-worker --schema-only" },
   ],
- 
+
   /*
    * afterAllMigrations: actions executed once all migrations are complete.
    */
@@ -135,5 +135,8 @@
    */
   // migrationsFolder: "./migrations",
 
-  "//generatedWith": "1.4.1"
+  "//generatedWith": "1.4.1",
+    "connectionString": "postgres://neondb_owner:npg_sy8ukcKafUx4@ep-shiny-dew-a2b9pd0d-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require",
+  "shadowConnectionString": "postgres://neondb_owner:npg_sy8ukcKafUx4@ep-shiny-dew-a2b9pd0d-pooler.eu-central-1.aws.neon.tech/neondb_shadow?sslmode=require",
+  "rootConnectionString": "postgres://neondb_owner:npg_sy8ukcKafUx4@ep-shiny-dew-a2b9pd0d-pooler.eu-central-1.aws.neon.tech/postgres?sslmode=require"
 }

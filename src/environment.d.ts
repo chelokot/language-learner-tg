@@ -7,6 +7,8 @@ export declare global {
       VERCEL_URL?: string;
       WEBHOOK_URL?: string;
       TELEGRAM_API_ROOT?: string;
+      OPENROUTER_API_KEY?: string;
+      OPENROUTER_BASE?: string;
     }
   }
 }

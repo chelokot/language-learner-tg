@@ -2,6 +2,7 @@ export const CONVERSATION_NAMES = {
   createVocabulary: 'createVocabularyConversation',
   renameVocabulary: 'renameVocabularyConversation',
   addWord: 'addWordConversation',
+  deleteWords: 'deleteWordsConversation',
   exercise: 'exerciseConversation',
 } as const;
 

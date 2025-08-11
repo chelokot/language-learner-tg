@@ -1,32 +1,33 @@
 # SBSR Telegram Bot
 
-A spaced repetition Telegram bot built in TypeScript. The bot uses serverless functions on Vercel and stores all state in Postgres. The implementation follows a functional, test‑driven workflow.
+A spaced repetition Telegram bot built in TypeScript. The bot uses serverless functions on Vercel and stores all state in Postgres. The implementation follows a functional, test-driven workflow.
 
 ## Stack
 
-- TypeScript
-- grammY via [ts-tg-bot](https://github.com/ExposedCat/ts-tg-bot)
-- Vercel Postgres via `@vercel/postgres`
-- Vitest for tests
+* TypeScript
+* grammY via [ts-tg-bot](https://github.com/ExposedCat/ts-tg-bot)
+* Vercel Postgres via `@vercel/postgres`
+* Vitest for tests
+* **OpenRouter** for auto-translation and sentence exercises
 
 ## Project structure
 
-- `src/` – bot source code and services
-- `api/` – Vercel serverless entrypoints
-- `migrations/` – SQL migrations managed by Graphile Migrate
-- `docs/` – design documents
-- `test/` – unit and e2e tests
-- `.github/workflows/` – CI configuration
+* `src/` – bot source code and services
+* `api/` – Vercel serverless entrypoints
+* `migrations/` – SQL migrations managed by Graphile Migrate
+* `docs/` – design documents
+* `test/` – unit and e2e tests
+* `.github/workflows/` – CI configuration
 
 ## Scripts
 
-- `npm run lint` – check formatting with Biome
-- `npm run format` – format the code
-- `npm test` – run unit and integration tests
-- `npm run migrate` – apply pending database migrations
-- `npm run test:migrations` – verify migrations run cleanly
+* `npm run lint` – check formatting with Biome
+* `npm run format` – format the code
+* `npm test` – run unit and integration tests
+* `npm run migrate` – apply pending database migrations
+* `npm run test:migrations` – verify migrations run cleanly
 
-The repository follows a strict **test‑driven development** approach.  Every new feature starts with a failing test which is then made to pass.  See `docs/design.md` for the details of the SBSR algorithm and database structure.
+The repository follows a strict **test-driven development** approach. Every new feature starts with a failing test which is then made to pass. See `docs/design.md` for the details of the SBSR algorithm and database structure.
 
 ## Development
 
@@ -35,11 +36,16 @@ The repository follows a strict **test‑driven development** approach.  Every n
 3. `npm test`
 
 Requirements: Node 20+, npm 10+. On Fedora: `sudo dnf install nodejs npm`.
+The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when setting up the Telegram webhook.
 
-The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when
-setting up the Telegram webhook.
+### LLM features
 
-See [docs/design.md](docs/design.md) for architectural details.
+If you want `/auto` translation, language code inference, and sentence exercises:
+
+* Set `OPENROUTER_API_KEY` in `.env`.
+* (Optional) set `OPENROUTER_BASE` (defaults to `https://openrouter.ai/api/v1`).
+
+Without those variables the bot still works; it falls back to deterministic prompts and basic checks so tests remain stable.
 
 ## Deploying to Vercel
 
