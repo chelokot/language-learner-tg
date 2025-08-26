@@ -2,9 +2,8 @@ import { createConversation } from '@grammyjs/conversations';
 import type { Conversation } from '@grammyjs/conversations';
 import { Composer } from 'grammy';
 import { waitText } from '../helpers/wait-text.js';
-import { checkTranslation } from '../services/exercise.js';
 import { getRecentSentenceExamples, saveSentenceExample } from '../services/sentence-log.js';
-import { autoTranslate, generateSentenceWithTerm, inferLanguageCode, judgeTranslation } from '../services/translate.js';
+import { autoTranslate, generateSentenceWithTerm, inferLanguageCode, judgeTranslation, judgeWordTranslation } from '../services/translate.js';
 import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
 import {
   type Vocabulary,
@@ -74,7 +73,6 @@ async function showVocabulary(ctx: CustomContext, id: number) {
   });
 
   const top = [...stats].sort((a, b) => b.score - a.score || a.goal.localeCompare(b.goal)).slice(0, 5);
-
   const bottom = [...stats].sort((a, b) => a.score - b.score || a.goal.localeCompare(b.goal)).slice(0, 5);
 
   const fmt = (w: (typeof stats)[number], i: number) =>
@@ -84,7 +82,7 @@ async function showVocabulary(ctx: CustomContext, id: number) {
   const lines: string[] = [
     `Vocabulary ${vocab.name} (${pair})`,
     ``,
-    `Level: ${vocab.level}`, // <-- NEW
+    `Level: ${vocab.level}`,
     `Total amount of words: ${total}`,
     ``,
     `Best learned words:`,
@@ -384,17 +382,21 @@ export async function exerciseConversation(
         const answer = await waitText(conv);
         if (answer === '/stop') break;
 
-        const ok = checkTranslation(word.native, answer);
-        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }));
-        await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.native}`);
+        const result = await conv.external(() =>
+          judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
+        );
+        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
+        await ctx.reply(result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`);
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
         if (answer === '/stop') break;
 
-        const ok = checkTranslation(word.goal, answer);
-        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: ok }));
-        await ctx.reply(ok ? 'Correct' : `Incorrect. Right answer: ${word.goal}`);
+        const result = await conv.external(() =>
+          judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
+        );
+        await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
+        await ctx.reply(result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`);
       }
     } else {
       const examples = await getRecentSentenceExamples({
