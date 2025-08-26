@@ -246,7 +246,7 @@ describe("basic user story e2e", () => {
     await server.start();
     process.env.TOKEN = "test-token";
     process.env.TELEGRAM_API_ROOT = server.config.apiURL;
-    bot = createBot(createMemoryDb(), {
+    bot = await createBot(createMemoryDb(), {
       preMiddlewares: [createLogMiddleware(logger)],
     });
     bot.start();
