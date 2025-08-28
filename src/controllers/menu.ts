@@ -133,12 +133,42 @@ Choose translation exercise to train.
   );
 }
 
-/** Always ACK callbacks first — this prevents flakiness in telegram-test-api. */
 async function ack(ctx: CustomContext) {
   try {
     await ctx.answerCallbackQuery();
-  } catch {
-    // ignore (e.g., when already answered)
+  } catch {}
+}
+
+function delay(ms: number) {
+  return new Promise<void>(r => setTimeout(r, ms));
+}
+
+async function sendVocabularyWordsList(ctx: CustomContext, vocabularyId: number) {
+  const vocab = await getVocabulary({ db: ctx.db, vocabularyId });
+  if (!vocab) {
+    await ctx.reply('Vocabulary not found');
+    return;
+  }
+
+  const words = await listWordsForVocabulary({ db: ctx.db, vocabularyId });
+  if (words.length === 0) {
+    await ctx.reply('This vocabulary has no words yet.');
+    return;
+  }
+
+  const MAX = 4096;
+  let buf = '';
+  for (const w of words) {
+    const entry = `${w.goal}\n${w.native}\n\n`;
+    if (buf.length + entry.length > MAX) {
+      await ctx.reply(buf);
+      await delay(100);
+      buf = '';
+    }
+    buf += entry;
+  }
+  if (buf.length) {
+    await ctx.reply(buf);
   }
 }
 
@@ -214,6 +244,11 @@ menuController.callbackQuery(/select_vocab:(\d+)/, async ctx => {
 menuController.callbackQuery(/exercise:(word|sentence):(gn|ng)/, async ctx => {
   await ack(ctx);
   await ctx.conversation.enter(CONVERSATION_NAMES.exercise, ctx.match![1], ctx.match![2]);
+});
+
+menuController.callbackQuery(/list_words:(\d+)/, async ctx => {
+  await ack(ctx);
+  await sendVocabularyWordsList(ctx, Number(ctx.match![1]));
 });
 
 export async function createVocabularyConversation(
