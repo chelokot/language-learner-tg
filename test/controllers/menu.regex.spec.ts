@@ -55,7 +55,7 @@ describe("menu callback regex", () => {
     process.env.TOKEN = "test-token";
     process.env.TELEGRAM_API_ROOT = server.config.apiURL;
 
-    bot = createBot(createMemoryDbWithVocab(12));
+    bot = await createBot(createMemoryDbWithVocab(12));
     bot.start();
   });
 

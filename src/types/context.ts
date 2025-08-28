@@ -1,6 +1,7 @@
 import type { ConversationFlavor } from '@grammyjs/conversations';
 import type { I18nContextFlavor, TemplateData } from '@grammyjs/i18n';
 import type { Context } from 'grammy';
+import type { SessionFlavor } from 'grammy';
 
 import type { Chat, Database, User } from './database.js';
 import type { Extra } from './telegram.js';
@@ -20,4 +21,10 @@ export interface Custom<C extends Context> {
 
 export type CustomContextMethods = Custom<Context>;
 
-export type CustomContext = Context & Custom<Context> & I18nContextFlavor & ConversationFlavor<Context>;
+export type SessionData = Record<string, unknown>;
+
+export type CustomContext = Context &
+  SessionFlavor<SessionData> &
+  Custom<Context> &
+  I18nContextFlavor &
+  ConversationFlavor<Context>;

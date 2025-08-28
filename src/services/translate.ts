@@ -167,6 +167,42 @@ export async function judgeTranslation(
   };
 }
 
+export async function judgeWordTranslation(
+  sourceWord: string,
+  fromLang: string,
+  toLang: string,
+  expected: string,
+  userAnswer: string,
+  level: string,
+): Promise<{ ok: boolean; feedback: string }> {
+  try {
+    const content = await chat([
+      {
+        role: 'system',
+        content:
+          'You are a precise bilingual lexicographer. Determine if the learner translation has the SAME MEANING as the expected one, allowing close synonyms, common paraphrases, and inflected forms. Be strict about direction and meaning, but tolerant about morphology and case. Respond with compact JSON: {"ok": true|false, "feedback": "one short hint"}.',
+      },
+      {
+        role: 'user',
+        content: `Goal language level: ${level}.\nCheck if learner translated a single word correctly by meaning.\nFrom (${fromLang}) word: ${sourceWord}\nTo (${toLang}) EXPECTED: ${expected}\nLearner ANSWER: ${userAnswer}`,
+      },
+    ]);
+    const parsed = safeParseJson(content);
+    if (typeof parsed?.ok === 'boolean' && typeof parsed?.feedback === 'string') {
+      return { ok: parsed.ok, feedback: parsed.feedback.trim() };
+    }
+  } catch (e) {
+    if (!(e instanceof LlmUnavailableError)) throw e;
+  }
+
+  // Fallback: old behavior — strict string check (this is also needed for your unit/e2e tests).
+  const ok = expected.trim().toLowerCase() === userAnswer.trim().toLowerCase();
+  return {
+    ok,
+    feedback: ok ? 'Looks fine.' : 'Consider a closer synonym.',
+  };
+}
+
 function safeParseJson(s: string): any {
   try {
     return JSON.parse(s);

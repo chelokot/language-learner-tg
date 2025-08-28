@@ -22,6 +22,8 @@ export function kbVocabulary(id: number) {
   return new InlineKeyboard()
     .text('Add word', `add_word:${id}`)
     .row()
+    .text('Show all words', `list_words:${id}`)
+    .row()
     .text('Delete words…', `delete_words:${id}`)
     .row()
     .text('Select Vocabulary', `select_vocab:${id}`)
