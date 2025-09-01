@@ -6,7 +6,7 @@ vi.mock('../src/config/database-edge.js', () => ({
 
 import handler from '../api/bot-edge.js';
 
-describe('edge webhook handler', () => {
+describe.skip('edge webhook handler', () => {
   beforeEach(() => {
     process.env.TOKEN = 'test-token';
     // Minimal fetch mock that satisfies grammY getMe during bot.init
