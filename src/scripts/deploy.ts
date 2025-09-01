@@ -12,8 +12,21 @@ export async function runMigrations() {
   });
 }
 
-export async function registerWebhook(token: string, baseUrl: string, fetchFn = fetch) {
-  const url = `https://api.telegram.org/bot${token}/setWebhook?url=${baseUrl}/api/bot`;
+export async function registerWebhook(
+  token: string,
+  baseUrl: string,
+  pathOrFetch?: string | typeof fetch,
+  maybeFetch?: typeof fetch,
+) {
+  let path = '/api/bot';
+  let fetchFn: typeof fetch = fetch;
+  if (typeof pathOrFetch === 'function') {
+    fetchFn = pathOrFetch;
+  } else if (typeof pathOrFetch === 'string') {
+    path = pathOrFetch;
+    if (maybeFetch) fetchFn = maybeFetch;
+  }
+  const url = `https://api.telegram.org/bot${token}/setWebhook?url=${baseUrl}${path}`;
   const res = await fetchFn(url);
   if (!('ok' in res)) {
     throw new Error('Unexpected fetch implementation');
