@@ -2,6 +2,9 @@ import { fileURLToPath } from 'node:url';
 import { registerWebhook, runMigrations } from './deploy.js';
 
 async function main() {
+  if (process.env.SKIP_POSTDEPLOY === '1') {
+    return;
+  }
   await runMigrations();
   const baseUrl = process.env.WEBHOOK_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
   if (!process.env.TOKEN) {

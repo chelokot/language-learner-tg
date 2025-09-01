@@ -13,6 +13,7 @@ describe("kbVocabulary", () => {
     );
     expect(rows).toEqual([
       [{ text: "Add word", data: "add_word:42" }],
+      [{ text: "Show all words", data: "list_words:42" }],
       [{ text: "Delete words…", data: "delete_words:42" }],
       [{ text: "Select Vocabulary", data: "select_vocab:42" }],
       [{ text: "Rename Vocabulary", data: "rename_vocab:42" }],

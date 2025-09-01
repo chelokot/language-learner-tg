@@ -2,12 +2,11 @@ import { I18n } from '@grammyjs/i18n';
 import en from '../locales/en.js';
 
 export function initLocaleEngineEdge(defaultLanguage = 'en') {
-  const repository = { en } as const;
-  return new I18n({
-    repository: repository as any,
+  const i18n = new I18n({
     defaultLanguage,
     defaultLanguageOnMissing: true,
     useSession: true,
   });
+  i18n.loadLocale('en', en as any);
+  return i18n;
 }
-

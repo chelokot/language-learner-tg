@@ -546,8 +546,14 @@ export async function exerciseConversation(
         if (answer === '/stop') {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
+<<<<<<< HEAD
           } catch {}
 >>>>>>> af2d72c (perf(serverless): cache DB pool and webhook handler for faster warm invocations\n\n- Cache @vercel/postgres pool in globalThis\n- Cache grammY webhook handler in globalThis and drop .env loading in serverless\n- Reduce webhook timeout to 10s for faster ACK\n\nchore(test): add db cache unit test)
+=======
+          } catch (_e) {
+            /* ignore */
+          }
+>>>>>>> 6b418f6 (fix(edge build): adjust i18n init, generic DB query, skip postdeploy locally\n\n- i18n: loadLocale instead of unsupported 'repository' option\n- Database.query is now generic to satisfy service typings\n- test: import bot-edge via .js path to satisfy tsc\n- postdeploy: allow SKIP_POSTDEPLOY=1 for local builds\n- docs: update Edge section for full runtime)
           break;
         }
 

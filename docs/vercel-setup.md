@@ -14,21 +14,18 @@ Follow these steps to run the bot on Vercel.
 6. Deploy the project. The build step runs `npm run postdeploy` which applies pending migrations using Graphile Migrate and configures the Telegram webhook using `WEBHOOK_URL` or `VERCEL_URL`.
 7. Start chatting with your bot.
 
-## Optional: Ultra‑fast webhook via Edge
+## Ultra‑fast webhook on Edge (full Edge runtime)
 
-If you want the fastest possible webhook acknowledgment, you can enable the Edge forwarder:
+This project provides a full Edge handler at `api/bot-edge.ts` that runs grammY directly on Edge:
 
-- Route: `api/bot-edge.ts` (Edge Runtime) immediately ACKs the webhook and forwards the update to the Node handler at `/api/bot`.
-- Set environment variable `WEBHOOK_PATH` to `/api/bot-edge` to register the Edge route as the webhook URL during deploy.
-- Optionally, set `WEBHOOK_FORWARD_URL` (base) and `WEBHOOK_FORWARD_PATH` (path, default `/api/bot`) to control where the Edge route forwards updates.
+- Uses `webhookCallback(bot, 'std/http')` for the Fetch API.
+- DB access via Neon HTTP driver (`@neondatabase/serverless`).
+- I18n repository is bundled in code (no filesystem access on Edge).
 
-Recommended setup:
+To enable:
 
-- Production env vars:
-  - `WEBHOOK_PATH=/api/bot-edge`
-  - `TOKEN`, `DATABASE_URL`, `WEBHOOK_URL` as usual
-- Preview env vars:
-  - `WEBHOOK_PATH=/api/bot-edge`
-  - `TOKEN` (staging), `DATABASE_URL` (staging)
+1. Set env var `WEBHOOK_PATH=/api/bot-edge` (Production and Preview) — deploy will register the Edge route as webhook.
+2. Ensure `DATABASE_URL` is compatible with Neon HTTP (Vercel Postgres works, as it is Neon under the hood).
+3. Keep `TOKEN` in both Production and Preview, and `WEBHOOK_URL` for Production to use your stable domain.
 
-This preserves DB work in Node (serverless) while minimizing webhook latency on Edge.
+If you prefer to stay on Node functions, omit `WEBHOOK_PATH` or set it to `/api/bot`.

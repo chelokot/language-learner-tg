@@ -4,7 +4,7 @@ vi.mock('../src/config/database-edge.js', () => ({
   connectToDbEdge: vi.fn(async () => ({ query: vi.fn(async () => ({ rows: [] })) })),
 }));
 
-import handler from '../api/bot-edge.ts';
+import handler from '../api/bot-edge.js';
 
 describe('edge webhook handler', () => {
   beforeEach(() => {
