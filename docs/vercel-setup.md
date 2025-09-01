@@ -22,10 +22,11 @@ This project provides a full Edge handler at `api/bot-edge.ts` that runs grammY 
 - DB access via Neon HTTP driver (`@neondatabase/serverless`).
 - I18n repository is bundled in code (no filesystem access on Edge).
 
-To enable:
+To enable and force Edge:
 
-1. Set env var `WEBHOOK_PATH=/api/bot-edge` (Production and Preview) — deploy will register the Edge route as webhook.
+1. `vercel.json` already pins the function to Edge:
+   `"functions": { "api/bot-edge.ts": { "runtime": "edge", "regions": ["fra1","arn1"], "maxDuration": 10 } }`.
 2. Ensure `DATABASE_URL` is compatible with Neon HTTP (Vercel Postgres works, as it is Neon under the hood).
-3. Keep `TOKEN` in both Production and Preview, and `WEBHOOK_URL` for Production to use your stable domain.
+3. Set `TOKEN` in both Production and Preview. The deploy script auto‑registers the webhook to `https://${VERCEL_URL}/api/bot-edge`.
 
 If you prefer to stay on Node functions, omit `WEBHOOK_PATH` or set it to `/api/bot`.
