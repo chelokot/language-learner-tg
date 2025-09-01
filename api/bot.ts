@@ -1,22 +1,21 @@
 import { webhookCallback } from 'grammy';
 import { connectToDb } from '../src/config/database.js';
 import { createBot } from '../src/config/bot.js';
-import { loadEnv } from '../src/helpers/load-env.js';
-import { validateEnv } from '../src/helpers/validate-env.js';
-
-let handler: ((req: any, res: any) => Promise<void> | void) | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __BOT_HANDLER__: ((req: any, res: any) => Promise<void> | void) | undefined;
+}
 
 async function initHandler() {
-  if (!handler) {
+  if (!globalThis.__BOT_HANDLER__) {
     if (!process.env.TOKEN || !process.env.DATABASE_URL) {
-      loadEnv('../.env');
-      validateEnv(['TOKEN', 'DATABASE_URL']);
+      throw new Error('Missing env: TOKEN or DATABASE_URL');
     }
     const db = await connectToDb();
     const bot = await createBot(db);
-    handler = webhookCallback(bot, 'http', 'return', 25_000);
+    globalThis.__BOT_HANDLER__ = webhookCallback(bot, 'http', 'return', 10_000);
   }
-  return handler;
+  return globalThis.__BOT_HANDLER__!;
 }
 
 export default async function(req: any, res: any) {

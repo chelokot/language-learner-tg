@@ -445,7 +445,13 @@ export async function exerciseConversation(
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
+<<<<<<< HEAD
         await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.native}`);
+=======
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`,
+        );
+>>>>>>> af2d72c (perf(serverless): cache DB pool and webhook handler for faster warm invocations\n\n- Cache @vercel/postgres pool in globalThis\n- Cache grammY webhook handler in globalThis and drop .env loading in serverless\n- Reduce webhook timeout to 10s for faster ACK\n\nchore(test): add db cache unit test)
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
@@ -455,7 +461,13 @@ export async function exerciseConversation(
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
+<<<<<<< HEAD
         await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.goal}`);
+=======
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`,
+        );
+>>>>>>> af2d72c (perf(serverless): cache DB pool and webhook handler for faster warm invocations\n\n- Cache @vercel/postgres pool in globalThis\n- Cache grammY webhook handler in globalThis and drop .env loading in serverless\n- Reduce webhook timeout to 10s for faster ACK\n\nchore(test): add db cache unit test)
       }
     } else {
       const examples = await getRecentSentenceExamples({
@@ -523,12 +535,19 @@ export async function exerciseConversation(
         );
 
         const answer = await waitText(conv);
+<<<<<<< HEAD
         if (isExitCommand(answer)) {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
           } catch (_e) {
             /* ignore */
           }
+=======
+        if (answer === '/stop') {
+          try {
+            await ctx.api.deleteMessage(chatId, holderMsgId);
+          } catch {}
+>>>>>>> af2d72c (perf(serverless): cache DB pool and webhook handler for faster warm invocations\n\n- Cache @vercel/postgres pool in globalThis\n- Cache grammY webhook handler in globalThis and drop .env loading in serverless\n- Reduce webhook timeout to 10s for faster ACK\n\nchore(test): add db cache unit test)
           break;
         }
 
