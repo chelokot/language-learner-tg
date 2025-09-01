@@ -2,9 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": ".",
   "functions": {
-    "api/bot-edge.ts": {
-      "runtime": "edge"
-    },
     "api/**/*.{js,ts}": {
       "includeFiles": "src/locales/**",
       "memory": 1024,
