@@ -214,7 +214,7 @@ menuController.callbackQuery(/open_vocab:(\d+)/, async ctx => {
 menuController.callbackQuery('create_vocab', async ctx => {
   await ack(ctx);
   console.log('[E2E-DBG] create_vocab tapped');
-  await ctx.reply('Enter the name of the language you are learning \\(' + 'Goal language\\), for example `English`:', {
+  await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
     parse_mode: 'MarkdownV2',
   });
   await ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary, true as any);
@@ -282,10 +282,9 @@ export async function createVocabularyConversation(
   console.log('[E2E-DBG] ctx.chat?', JSON.stringify(ctx.chat));
   if (!firstPromptAlreadySent) {
     try {
-      await ctx.reply(
-        'Enter the name of the language you are learning \\(' + 'Goal language\\), for example `English`:',
-        { parse_mode: 'MarkdownV2' },
-      );
+      await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
+        parse_mode: 'MarkdownV2',
+      });
       console.log('[E2E-DBG] sent prompt: goal language');
     } catch (e) {
       console.log('[E2E-DBG] failed to send prompt', e);
