@@ -1,11 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": ".",
-  "functions": {
-    "api/**/*.{js,ts,tsx}": {
-      "includeFiles": "src/locales/**",
-      "memory": 1024,
-      "maxDuration": 30
-    }
-  }
+  "outputDirectory": "."
 }
