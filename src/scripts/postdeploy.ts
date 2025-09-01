@@ -6,15 +6,14 @@ async function main() {
     return;
   }
   await runMigrations();
-  const baseUrl = process.env.WEBHOOK_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
   if (!process.env.TOKEN) {
     throw new Error('TOKEN is not set');
   }
   if (!baseUrl) {
-    throw new Error('WEBHOOK_URL or VERCEL_URL must be set');
+    throw new Error('VERCEL_URL must be set');
   }
-  const path = process.env.WEBHOOK_PATH || '/api/bot';
-  await registerWebhook(process.env.TOKEN, baseUrl, path);
+  await registerWebhook(process.env.TOKEN, baseUrl);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

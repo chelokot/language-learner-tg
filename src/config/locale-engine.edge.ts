@@ -5,7 +5,7 @@ export function initLocaleEngineEdge(defaultLanguage = 'en') {
   const i18n = new I18n({
     defaultLanguage,
     defaultLanguageOnMissing: true,
-    useSession: true,
+    useSession: false,
   });
   i18n.loadLocale('en', en as any);
   return i18n;

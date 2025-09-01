@@ -7,9 +7,9 @@ declare global {
 }
 
 export async function connectToDbEdge(): Promise<Database> {
-  if (globalThis.__EDGE_DB__) return globalThis.__EDGE_DB__;
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is not set');
+  if (globalThis.__EDGE_DB__) return globalThis.__EDGE_DB__;
 
   neonConfig.fetchConnectionCache = true;
   const sql = neon(url);

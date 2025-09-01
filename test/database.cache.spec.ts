@@ -1,20 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('@vercel/postgres', async () => {
-  const actual: any = await vi.importActual('@vercel/postgres');
-  return {
-    ...actual,
-    createPool: vi.fn((opts?: any) => ({ ...opts, kind: 'pool', query: vi.fn() })),
-  };
+vi.mock('@neondatabase/serverless', () => {
+  const neonFn = vi.fn(() => ({
+    // minimal client shape our adapter uses
+    // no unsafe mocking needed in this test path
+  }));
+  return { neon: neonFn, neonConfig: {} as any };
 });
 
 // eslint-disable-next-line import/first
-import { connectToDb } from '../src/config/database.js';
-import { createPool } from '@vercel/postgres';
+import { connectToDbEdge as connectToDb } from '../src/config/database-edge.js';
+import { neon } from '@neondatabase/serverless';
 
-describe('connectToDb caching', () => {
+describe('connectToDbEdge caching', () => {
   beforeEach(() => {
-    (createPool as unknown as any).mockClear?.();
     process.env.DATABASE_URL = 'postgres://user:pass@localhost/db';
   });
 
@@ -28,6 +27,6 @@ describe('connectToDb caching', () => {
     const a = await connectToDb();
     const b = await connectToDb();
     expect(a).toBe(b);
-    expect((createPool as unknown as any).mock.calls.length).toBe(1);
+    expect((neon as unknown as any).mock.calls.length).toBe(1);
   });
 });
