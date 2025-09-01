@@ -1,14 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": ".",
+  "regions": ["iad1"],
   "functions": {
-    "api/bot-edge.ts": {
-      "runtime": "edge",
-      "maxDuration": 10,
-      "includeFiles": "src/locales/**"
-    },
-    "api/**/*.{js,ts}": {
-      "includeFiles": "src/locales/**"
+    "api/**/*": {
+      "memory": 1024,
+      "maxDuration": 30
     }
   }
 }
