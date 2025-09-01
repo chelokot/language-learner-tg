@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "compile": "tsc",
-    "postcompile": "mkdir -p build/src && cp -r src/locales build/src && mkdir -p api && cp build/api/* api/",
+    "postcompile": "mkdir -p build/src && cp -r src/locales build/src",
     "postdeploy": "node build/src/scripts/postdeploy.js",
     "build": "npm run compile && npm run postdeploy",
     "start": "npm run compile && node .",
