@@ -1,3 +1,4 @@
+export const runtime = 'edge' as const;
 export const config = { runtime: 'edge', regions: ['fra1', 'arn1'] } as const;
 
 import { webhookCallback } from 'grammy';
