@@ -13,7 +13,7 @@ export async function runMigrations() {
 }
 
 export async function registerWebhook(token: string, baseUrl: string, fetchFn = fetch) {
-  const url = `https://api.telegram.org/bot${token}/setWebhook?url=${baseUrl}/api/bot`;
+  const url = `https://api.telegram.org/bot${token}/setWebhook?url=${baseUrl}/api/bot-edge`;
   const res = await fetchFn(url);
   if (!('ok' in res)) {
     throw new Error('Unexpected fetch implementation');

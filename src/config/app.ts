@@ -1,7 +1,7 @@
 import { loadEnv } from '../helpers/load-env.js';
 import { validateEnv } from '../helpers/validate-env.js';
-import { startBot } from './bot.js';
-import { connectToDb } from './database.js';
+import { startBot } from './bot.edge.js';
+import { connectToDbEdge as connectToDb } from './database-edge.js';
 
 export async function startApp() {
   try {

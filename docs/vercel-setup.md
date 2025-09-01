@@ -13,3 +13,20 @@ Follow these steps to run the bot on Vercel.
    The HTTP function defined in `api/bot.ts` will handle Telegram updates.
 6. Deploy the project. The build step runs `npm run postdeploy` which applies pending migrations using Graphile Migrate and configures the Telegram webhook using `WEBHOOK_URL` or `VERCEL_URL`.
 7. Start chatting with your bot.
+
+## Ultra‑fast webhook on Edge (full Edge runtime)
+
+This project provides a full Edge handler at `api/bot-edge.ts` that runs grammY directly on Edge:
+
+- Uses `webhookCallback(bot, 'std/http')` for the Fetch API.
+- DB access via Neon HTTP driver (`@neondatabase/serverless`).
+- I18n repository is bundled in code (no filesystem access on Edge).
+
+To enable and force Edge:
+
+1. `vercel.json` already pins the function to Edge:
+   `"functions": { "api/bot-edge.ts": { "runtime": "edge", "regions": ["fra1","arn1"], "maxDuration": 10 } }`.
+2. Ensure `DATABASE_URL` is compatible with Neon HTTP (Vercel Postgres works, as it is Neon under the hood).
+3. Set `TOKEN` in both Production and Preview. The deploy script auto‑registers the webhook to `https://${VERCEL_URL}/api/bot-edge`.
+
+If you prefer to stay on Node functions, omit `WEBHOOK_PATH` or set it to `/api/bot`.
