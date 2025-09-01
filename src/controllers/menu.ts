@@ -3,7 +3,13 @@ import type { Conversation } from '@grammyjs/conversations';
 import { Composer } from 'grammy';
 import { waitText } from '../helpers/wait-text.js';
 import { getRecentSentenceExamples, saveSentenceExample } from '../services/sentence-log.js';
-import { autoTranslate, generateSentenceWithTerm, inferLanguageCode, judgeTranslation, judgeWordTranslation } from '../services/translate.js';
+import {
+  autoTranslate,
+  generateSentenceWithTerm,
+  inferLanguageCode,
+  judgeTranslation,
+  judgeWordTranslation,
+} from '../services/translate.js';
 import { getCurrentVocabularyId, setCurrentVocabulary } from '../services/user.js';
 import {
   type Vocabulary,
@@ -421,7 +427,9 @@ export async function exerciseConversation(
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`);
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`,
+        );
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
@@ -431,7 +439,9 @@ export async function exerciseConversation(
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`);
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`,
+        );
       }
     } else {
       const examples = await getRecentSentenceExamples({
@@ -464,7 +474,9 @@ export async function exerciseConversation(
 
         const answer = await waitText(conv);
         if (answer === '/stop') {
-          try { await ctx.api.deleteMessage(chatId, holderMsgId); } catch {}
+          try {
+            await ctx.api.deleteMessage(chatId, holderMsgId);
+          } catch {}
           break;
         }
 
@@ -472,17 +484,18 @@ export async function exerciseConversation(
         const result = await conv.external(() =>
           judgeTranslation(sentence, answer, goalLanguage, nativeLanguage, word.goal, word.native, level),
         );
-        await conv.external(() => updateWordAnswerStats({
-          db: ctx.db,
-          wordId: word.id,
-          correct: result.ok,
-        }));
+        await conv.external(() =>
+          updateWordAnswerStats({
+            db: ctx.db,
+            wordId: word.id,
+            correct: result.ok,
+          }),
+        );
         await ctx.api.editMessageText(
           chatId,
           analyzing.message_id,
           result.ok ? `Correct!\n\n${result.feedback}` : `Not quite.\n\n${result.feedback}`,
         );
-
       } else {
         sentence = await conv.external(() =>
           generateSentenceWithTerm(nativeLanguage, word.native, 'native', level, examples),
@@ -495,7 +508,9 @@ export async function exerciseConversation(
 
         const answer = await waitText(conv);
         if (answer === '/stop') {
-          try { await ctx.api.deleteMessage(chatId, holderMsgId); } catch {}
+          try {
+            await ctx.api.deleteMessage(chatId, holderMsgId);
+          } catch {}
           break;
         }
 
@@ -503,11 +518,13 @@ export async function exerciseConversation(
         const result = await conv.external(() =>
           judgeTranslation(sentence, answer, nativeLanguage, goalLanguage, word.goal, word.native, level),
         );
-        await conv.external(() => updateWordAnswerStats({
-          db: ctx.db,
-          wordId: word.id,
-          correct: result.ok,
-        }));
+        await conv.external(() =>
+          updateWordAnswerStats({
+            db: ctx.db,
+            wordId: word.id,
+            correct: result.ok,
+          }),
+        );
         await ctx.api.editMessageText(
           chatId,
           analyzing.message_id,
@@ -522,21 +539,25 @@ export async function exerciseConversation(
         nextTaskHolderMsgId = null;
       }
 
-      await conv.external(() => saveSentenceExample({
-        db: ctx.db,
-        userId: ctx.dbEntities.user.user_id,
-        vocabularyId: vocabId,
-        exerciseKind: 'sentence',
-        direction: dir,
-        goalWord: word.goal,
-        nativeWord: word.native,
-        sentence,
-      }));
+      await conv.external(() =>
+        saveSentenceExample({
+          db: ctx.db,
+          userId: ctx.dbEntities.user.user_id,
+          vocabularyId: vocabId,
+          exerciseKind: 'sentence',
+          direction: dir,
+          goalWord: word.goal,
+          nativeWord: word.native,
+          sentence,
+        }),
+      );
     }
   }
 
   if (nextTaskHolderMsgId != null) {
-    try { await ctx.api.deleteMessage(chatId, nextTaskHolderMsgId); } catch {}
+    try {
+      await ctx.api.deleteMessage(chatId, nextTaskHolderMsgId);
+    } catch {}
   }
 
   await conv.external(() => showMenu(ctx));
