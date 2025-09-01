@@ -9,6 +9,7 @@ describe('vercel.json', () => {
 
   it('bundles locale files', () => {
     const cfg = JSON.parse(readFileSync('vercel.json', 'utf8')) as any;
-    expect(cfg.functions["api/**/*.{js,ts}"].includeFiles).toBe('src/locales/**');
+    const f = cfg.functions["api/**/*.{js,ts,tsx}"] ?? cfg.functions["api/**/*.{js,ts}"];
+    expect(f.includeFiles).toBe('src/locales/**');
   });
 });
