@@ -10,7 +10,8 @@ async function main() {
   if (!baseUrl) {
     throw new Error('WEBHOOK_URL or VERCEL_URL must be set');
   }
-  await registerWebhook(process.env.TOKEN, baseUrl);
+  const path = process.env.WEBHOOK_PATH || '/api/bot';
+  await registerWebhook(process.env.TOKEN, baseUrl, path);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
