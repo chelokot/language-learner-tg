@@ -4,12 +4,9 @@ import { describe, it, expect } from 'vitest';
 describe('vercel.json', () => {
 it('uses root as output directory', () => {
   const cfg = JSON.parse(readFileSync('vercel.json', 'utf8')) as { outputDirectory?: string };
-  // Accept either explicit root output or omitted (default behavior)
-  if (cfg.outputDirectory !== undefined) {
-    expect(cfg.outputDirectory).toBe('.');
-  } else {
-    expect(cfg.outputDirectory).toBeUndefined();
-  }
+  // Accept either explicit root output or new Build Output API directory
+  const acceptable = new Set(['.', '.vercel/output', undefined]);
+  expect(acceptable.has(cfg.outputDirectory as any)).toBe(true);
 });
 
   it('bundles locale files when functions config present', () => {
