@@ -4,7 +4,6 @@
   "functions": {
     "api/bot-edge.ts": {
       "runtime": "edge",
-      "regions": ["fra1", "arn1"],
       "maxDuration": 10,
       "includeFiles": "src/locales/**"
     },
