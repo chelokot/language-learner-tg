@@ -1,5 +1,5 @@
-import type { Database, QueryResult } from '../types/database.js';
 import { neon, neonConfig } from '@neondatabase/serverless';
+import type { Database, QueryResult } from '../types/database.js';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -25,4 +25,3 @@ export async function connectToDbEdge(): Promise<Database> {
   globalThis.__EDGE_DB__ = db;
   return db;
 }
-

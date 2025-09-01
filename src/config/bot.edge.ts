@@ -13,7 +13,9 @@ import { createExtendContextMiddleware } from './extend-context.js';
 import { initLocaleEngineEdge } from './locale-engine.edge.js';
 import { PgKVStorage } from './storage.js';
 
-function setupPreControllers(_bot: Bot) {}
+function setupPreControllers(_bot: Bot) {
+  // no pre-controllers for now (edge)
+}
 
 function setupMiddlewares(bot: Bot, localeEngine: I18n) {
   bot.use(localeEngine.middleware());
@@ -35,9 +37,10 @@ export type CreateBotOptions = {
 export async function createBotEdge(database: Database, options?: CreateBotOptions) {
   const i18n = initLocaleEngineEdge();
 
-  const botInfo = process.env.NODE_ENV === 'test'
-    ? ({ id: 1, is_bot: true, first_name: 'test', username: 'test' } as any)
-    : undefined;
+  const botInfo =
+    process.env.NODE_ENV === 'test'
+      ? ({ id: 1, is_bot: true, first_name: 'test', username: 'test' } as any)
+      : undefined;
   const bot = new TelegramBot<CustomContext>(process.env.TOKEN, {
     client: process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : undefined,
     botInfo,
@@ -63,13 +66,17 @@ export async function createBotEdge(database: Database, options?: CreateBotOptio
         }),
       );
     }
-  } catch {}
+  } catch {
+    // no-op for unit tests with strict mocks
+  }
 
   setupMiddlewares(bot, i18n);
 
   const hasDb = typeof (database as any)?.query === 'function';
   const convStorage = hasDb ? new PgKVStorage(database, 'conversations') : undefined;
-  const convPlugins = options?.preMiddlewares ? [extendContextMiddleware, ...options.preMiddlewares] : [extendContextMiddleware];
+  const convPlugins = options?.preMiddlewares
+    ? [extendContextMiddleware, ...options.preMiddlewares]
+    : [extendContextMiddleware];
 
   if (convStorage) {
     bot.use(

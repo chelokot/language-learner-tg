@@ -11,5 +11,5 @@ export interface Chat {
 
 export type QueryResult<Row = any> = { rows: Row[] };
 export interface Database {
-  query: (text: string, params?: any[]) => Promise<QueryResult>;
+  query: <Row = any>(text: string, params?: any[]) => Promise<QueryResult<Row>>;
 }

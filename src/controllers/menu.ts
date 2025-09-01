@@ -142,7 +142,9 @@ Choose translation exercise to train.
 async function ack(ctx: CustomContext) {
   try {
     await ctx.answerCallbackQuery();
-  } catch {}
+  } catch {
+    // ignore callback ack errors (message may be gone)
+  }
 }
 
 function delay(ms: number) {
@@ -476,7 +478,9 @@ export async function exerciseConversation(
         if (answer === '/stop') {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
-          } catch {}
+          } catch {
+            /* ignore */
+          }
           break;
         }
 
@@ -510,7 +514,9 @@ export async function exerciseConversation(
         if (answer === '/stop') {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
-          } catch {}
+          } catch {
+            /* ignore */
+          }
           break;
         }
 
@@ -557,7 +563,9 @@ export async function exerciseConversation(
   if (nextTaskHolderMsgId != null) {
     try {
       await ctx.api.deleteMessage(chatId, nextTaskHolderMsgId);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   await conv.external(() => showMenu(ctx));
