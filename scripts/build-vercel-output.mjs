@@ -20,7 +20,10 @@ async function bundleEdge(entryFile, route, regions = ['fra1', 'arn1']) {
     bundle: true,
     format: 'esm',
     platform: 'neutral',
-    target: 'esnext',
+    target: 'es2022',
+    mainFields: ['module', 'browser', 'main'],
+    conditions: ['worker', 'browser', 'module', 'import'],
+    resolveExtensions: ['.ts', '.tsx', '.js', '.mjs'],
     sourcemap: false,
     minify: false,
     logLevel: 'info',
@@ -38,8 +41,8 @@ async function main() {
   ensureDir(FUNCTIONS_ROOT);
   // Map of source entry file -> route path
   const entries = [
-    { entry: 'api/bot-edge.ts', route: 'api/bot-edge' },
-    { entry: 'api/edge-ping.ts', route: 'api/edge-ping' },
+    { entry: 'build/api/bot-edge.js', route: 'api/bot-edge' },
+    { entry: 'build/api/edge-ping.js', route: 'api/edge-ping' },
   ];
 
   for (const { entry, route } of entries) {
@@ -51,4 +54,3 @@ main().catch((err) => {
   console.error('[build-vercel-output] failed:', err);
   process.exit(1);
 });
-
