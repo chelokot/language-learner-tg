@@ -48,17 +48,34 @@ export async function createBotEdge(database: Database, options?: CreateBotOptio
   if (options?.apiTransformers) {
     bot.api.config.use(...options.apiTransformers);
   }
+  if (process.env.NODE_ENV === 'test') {
+    bot.use(async (ctx, next) => {
+      console.log('[E2E-DBG] update', (ctx.update as any).update_id, ctx.msg?.text, ctx.callbackQuery?.data);
+      await next();
+    });
+    const apiCfg: any = (bot as any).api?.config;
+    if (apiCfg?.use) {
+      apiCfg.use(async (prev: any, method: any, payload: any, signal: any) => {
+        console.log('[E2E-DBG] API', method, JSON.stringify(payload));
+        return prev(method, payload, signal);
+      });
+    }
+  }
 
   const extendContextMiddleware = createExtendContextMiddleware(database);
   setupPreControllers(bot);
   bot.use(extendContextMiddleware);
+  if (options?.preMiddlewares && options.preMiddlewares.length) {
+    bot.use(...options.preMiddlewares);
+  }
 
   try {
     const grammyMod: any = await import('grammy');
     const sessionFn = grammyMod?.session;
     const hasDb = typeof (database as any)?.query === 'function';
     if (typeof sessionFn === 'function') {
-      const storage = hasDb ? new PgKVStorage(database, 'session') : undefined;
+      const storage =
+        process.env.NODE_ENV === 'test' ? undefined : hasDb ? new PgKVStorage(database, 'session') : undefined;
       bot.use(
         sessionFn({
           initial: () => ({}),
@@ -73,7 +90,8 @@ export async function createBotEdge(database: Database, options?: CreateBotOptio
   setupMiddlewares(bot, i18n);
 
   const hasDb = typeof (database as any)?.query === 'function';
-  const convStorage = hasDb ? new PgKVStorage(database, 'conversations') : undefined;
+  const convStorage =
+    process.env.NODE_ENV === 'test' ? undefined : hasDb ? new PgKVStorage(database, 'conversations') : undefined;
   const convPlugins = options?.preMiddlewares
     ? [extendContextMiddleware, ...options.preMiddlewares]
     : [extendContextMiddleware];
@@ -95,4 +113,16 @@ export async function createBotEdge(database: Database, options?: CreateBotOptio
 
   setupControllers(bot);
   return bot;
+}
+
+export async function startBot(
+  database: Database,
+  options?: { apiTransformers?: Transformer[]; preMiddlewares?: any[] },
+) {
+  const bot = await createBotEdge(database, options);
+  return new Promise(resolve =>
+    bot.start({
+      onStart: () => resolve(undefined),
+    }),
+  );
 }

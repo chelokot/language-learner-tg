@@ -25,22 +25,24 @@ describe('registerWebhook', () => {
   it('calls Telegram API with proper URL', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     const { registerWebhook } = await import('../src/scripts/deploy.js');
-    await registerWebhook('abc', 'https://example.com', fetchMock);
+    await registerWebhook('abc', 'https://example.com', fetchMock as any);
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://api.telegram.org/botabc/setWebhook?url=https://example.com/api/bot',
+      'https://api.telegram.org/botabc/setWebhook?url=https://example.com/api/bot-edge',
     );
   });
 
   it('throws when Telegram returns ok=false', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: false, description: 'bad' }) });
     const { registerWebhook } = await import('../src/scripts/deploy.js');
-    await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow('Webhook setup failed: bad');
+    await expect(registerWebhook('abc', 'https://example.com', fetchMock as any)).rejects.toThrow(
+      'Webhook setup failed: bad',
+    );
   });
 
   it('throws when response lacks ok field', async () => {
     const fetchMock = vi.fn().mockResolvedValue({});
     const { registerWebhook } = await import('../src/scripts/deploy.js');
-    await expect(registerWebhook('abc', 'https://example.com', fetchMock)).rejects.toThrow(
+    await expect(registerWebhook('abc', 'https://example.com', fetchMock as any)).rejects.toThrow(
       'Unexpected fetch implementation',
     );
   });

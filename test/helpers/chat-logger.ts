@@ -3,10 +3,12 @@ export type Event = { role: 'bot'; text: string; buttons?: string[] } | { role: 
 export class ChatLogger {
   private events: Event[] = [];
   private seenIds = new Set<number>();
+  private lastId: number | undefined;
 
   logBot(text: string, buttons?: string[], id?: number) {
     if (id && this.seenIds.has(id)) return;
     if (id) this.seenIds.add(id);
+    if (id) this.lastId = id;
     const last = this.events[this.events.length - 1];
     if (
       last &&
@@ -25,6 +27,10 @@ export class ChatLogger {
 
   getEvents() {
     return this.events;
+  }
+
+  getLastMessageId() {
+    return this.lastId;
   }
 
   clear() {

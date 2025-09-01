@@ -52,6 +52,7 @@
     "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 0\n\nBest learned words:\n\nLeast learned words:",
     "buttons": [
       "Add word",
+      "Show all words",
       "Delete words…",
       "Select Vocabulary",
       "Rename Vocabulary",
@@ -102,20 +103,12 @@
     "buttons": []
   },
   { "role": "user", "text": "привет" },
-  { "role": "bot", "text": "Correct", "buttons": [] },
-  {
-    "role": "bot",
-    "text": "Translate this word from English to Russian:\nhello",
-    "buttons": []
-  },
+  { "role": "bot", "text": "Correct\nLooks fine.", "buttons": [] },
   { "role": "user", "text": "wrong" },
-  { "role": "bot", "text": "Incorrect. Right answer: привет", "buttons": [] },
-  {
-    "role": "bot",
-    "text": "Translate this word from English to Russian:\nhello",
-    "buttons": []
-  },
+  { "role": "bot", "text": "Translate this word from English to Russian:\nhello", "buttons": [] },
+  { "role": "bot", "text": "Incorrect. Right answer: привет\nConsider a closer synonym.", "buttons": [] },
   { "role": "user", "text": "/stop" },
+  { "role": "bot", "text": "Translate this word from English to Russian:\nhello", "buttons": [] },
   {
     "role": "bot",
     "text": "Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them",
@@ -133,6 +126,7 @@
     "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 1\n\nBest learned words:\n1. hello/привет - 1 correct, 1 mistakes\n\nLeast learned words:\n1. hello/привет - 1 correct, 1 mistakes",
     "buttons": [
       "Add word",
+      "Show all words",
       "Delete words…",
       "Select Vocabulary",
       "Rename Vocabulary",
