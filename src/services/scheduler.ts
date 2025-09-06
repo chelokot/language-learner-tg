@@ -17,4 +17,3 @@ export function computePriority(stats: WordStats): number {
 export function compareByPriority(a: WordStats, b: WordStats): number {
   return computePriority(b) - computePriority(a);
 }
-
