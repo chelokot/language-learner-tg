@@ -426,9 +426,6 @@ describe("basic user story e2e", () => {
     );
     expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
-<<<<<<< HEAD
   }, 12000);
-=======
   }, 12000);
->>>>>>> 192b3cb (feat(edge): switch bot to Edge runtime with Neon HTTP\n\n- Replace Node serverless with api/bot-edge.ts only\n- Add @neondatabase/serverless adapter and Edge i18n\n- Auto-register webhook to /api/bot-edge via VERCEL_URL\n- Remove api/bot.ts and Node DB config)
 });
