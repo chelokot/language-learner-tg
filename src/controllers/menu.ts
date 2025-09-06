@@ -440,9 +440,7 @@ export async function exerciseConversation(
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(
-          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`,
-        );
+        await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.native}`);
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
@@ -452,9 +450,7 @@ export async function exerciseConversation(
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(
-          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`,
-        );
+        await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.goal}`);
       }
     } else {
       const examples = await getRecentSentenceExamples({

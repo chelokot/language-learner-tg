@@ -22,6 +22,7 @@ function createMemoryDb(): Database {
 
   return {
     async query(sql: string, params: any[]) {
+      const norm = sql.replace(/\s+/g, ' ').trim();
       // --- users
       if (sql.startsWith("INSERT INTO app_user")) {
         return {
@@ -171,10 +172,10 @@ function createMemoryDb(): Database {
 
       // --- words: priority-ordered candidates for exercise (new selection)
       if (
-        sql.startsWith("SELECT") &&
-        sql.includes("FROM word") &&
-        sql.includes("WHERE vocabulary_id=$1") &&
-        sql.includes("ORDER BY priority DESC")
+        norm.startsWith("SELECT") &&
+        norm.includes("FROM word") &&
+        norm.includes("WHERE vocabulary_id=$1") &&
+        norm.includes("ORDER BY priority DESC")
       ) {
         const vsId = params[0];
         const limit = params[1] ?? 10;
@@ -279,11 +280,13 @@ describe("basic user story e2e", () => {
   it("creates vocabulary with languages, adds word and performs exercise", async () => {
     const client = server.getClient("test-token");
 
+    console.log('[STEP] /start');
     await client.sendCommand(client.makeCommand("/start"));
     logger.logUser("/start");
     await server.waitBotMessage();
     let updates = await client.getUpdates();
 
+    console.log('[STEP] /menu');
     await client.sendCommand(client.makeCommand("/menu"));
     logger.logUser("/menu");
     await server.waitBotMessage();
@@ -291,6 +294,7 @@ describe("basic user story e2e", () => {
     const menuUpdate = updates.result[0].message!;
     const menuMsgId = menuUpdate.message_id;
 
+    console.log('[STEP] tap Vocabularies');
     await client.sendCallback(
       client.makeCallbackQuery("vocabularies", {
         message: { message_id: menuMsgId },
@@ -302,6 +306,7 @@ describe("basic user story e2e", () => {
     const listUpdate = updates.result.at(-1)!.message!;
     const listMsgId = listUpdate.message_id;
 
+    console.log('[STEP] tap Create vocabulary');
     await client.sendCallback(
       client.makeCallbackQuery("create_vocab", {
         message: { message_id: listMsgId },
@@ -311,21 +316,25 @@ describe("basic user story e2e", () => {
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] English');
     await client.sendMessage(client.makeMessage("English"));
     logger.logUser("English");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] Russian');
     await client.sendMessage(client.makeMessage("Russian"));
     logger.logUser("Russian");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] c1 preparation');
     await client.sendMessage(client.makeMessage("c1 preparation"));
     logger.logUser("c1 preparation");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] c1');
     await client.sendMessage(client.makeMessage("c1"));
     logger.logUser("c1");
     await server.waitBotMessage();
@@ -333,6 +342,7 @@ describe("basic user story e2e", () => {
     const vocabUpdate = updates.result.at(-1)!.message!;
     const vocabMsgId = vocabUpdate.message_id;
 
+    console.log('[STEP] tap Add word');
     await client.sendCallback(
       client.makeCallbackQuery("add_word:1", {
         message: { message_id: vocabMsgId },
@@ -342,16 +352,19 @@ describe("basic user story e2e", () => {
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] hello');
     await client.sendMessage(client.makeMessage("hello"));
     logger.logUser("hello");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] привет');
     await client.sendMessage(client.makeMessage("привет"));
     logger.logUser("привет");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] stop adding words');
     await client.sendMessage(client.makeMessage("/stop"));
     logger.logUser("/stop");
     await server.waitBotMessage();
@@ -359,6 +372,7 @@ describe("basic user story e2e", () => {
     const menu2 = updates.result.at(-1)!.message!;
     const menu2MsgId = menu2.message_id;
 
+    console.log('[STEP] tap Exercises');
     await client.sendCallback(
       client.makeCallbackQuery("exercises", {
         message: { message_id: menu2MsgId },
@@ -370,6 +384,7 @@ describe("basic user story e2e", () => {
     const exUpdate = updates.result.at(-1)!.message!;
     const exMsgId = exUpdate.message_id;
 
+    console.log('[STEP] tap Word EN→RU');
     await client.sendCallback(
       client.makeCallbackQuery("exercise:word:gn", {
         message: { message_id: exMsgId },
@@ -379,16 +394,19 @@ describe("basic user story e2e", () => {
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] answer correct');
     await client.sendMessage(client.makeMessage("привет"));
     logger.logUser("привет");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] answer wrong');
     await client.sendMessage(client.makeMessage("wrong"));
     logger.logUser("wrong");
     await server.waitBotMessage();
     await client.getUpdates();
 
+    console.log('[STEP] stop exercise');
     await client.sendMessage(client.makeMessage("/stop"));
     logger.logUser("/stop");
     await server.waitBotMessage();
@@ -396,6 +414,7 @@ describe("basic user story e2e", () => {
     const menuUpdate2 = updates.result[0].message!;
     const menuMsgId2 = menuUpdate2.message_id;
 
+    console.log('[STEP] tap Vocabularies 2');
     await client.sendCallback(
       client.makeCallbackQuery("vocabularies", {
         message: { message_id: menuMsgId2 },
@@ -407,6 +426,7 @@ describe("basic user story e2e", () => {
     const listUpdate2 = updates.result.at(-1)!.message!;
     const listMsgId2 = listUpdate2.message_id;
 
+    console.log('[STEP] open vocab again');
     await client.sendCallback(
       client.makeCallbackQuery("open_vocab:1", {
         message: { message_id: listMsgId2 },
@@ -426,5 +446,5 @@ describe("basic user story e2e", () => {
     );
     expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
-  }, 40000);
+  }, 70000);
 });

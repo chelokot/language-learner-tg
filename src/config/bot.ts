@@ -58,9 +58,10 @@ export async function createBot(database: Database, options?: CreateBotOptions) 
     const grammyMod: any = await import('grammy');
     const sessionFn = grammyMod?.session;
     const hasDb = typeof (database as any)?.query === 'function';
+    const isTest = process.env.NODE_ENV === 'test';
 
     if (typeof sessionFn === 'function') {
-      const storage = hasDb ? new PgKVStorage(database, 'session') : undefined;
+      const storage = hasDb && !isTest ? new PgKVStorage(database, 'session') : undefined;
       bot.use(
         sessionFn({
           initial: () => ({}),
@@ -81,11 +82,17 @@ export async function createBot(database: Database, options?: CreateBotOptions) 
   // Inside conversations, access to db/text is also needed → pass extendContext into plugins.
   // Store conversations state in the database via the same KV-adapter.
   const hasDb = typeof (database as any)?.query === 'function';
-  const convStorage = hasDb ? new PgKVStorage(database, 'conversations') : undefined;
+  const isTest = process.env.NODE_ENV === 'test';
+  const convStorage = hasDb && !isTest ? new PgKVStorage(database, 'conversations') : undefined;
 
   const convPlugins = options?.preMiddlewares
     ? [extendContextMiddleware, ...options.preMiddlewares]
     : [extendContextMiddleware];
+
+  // Also install preMiddlewares globally so non-conversation flows are logged/instrumented
+  if (options?.preMiddlewares?.length) {
+    for (const mw of options.preMiddlewares) bot.use(mw);
+  }
 
   // If storage exists — connect it, otherwise use in-memory (locally/in tests this is ok).
   if (convStorage) {
