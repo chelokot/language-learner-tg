@@ -427,5 +427,4 @@ describe("basic user story e2e", () => {
     expect(hasConsecutiveUserMessages(events)).toBe(false);
     expect(events).toEqual(expected);
   }, 12000);
-  }, 12000);
 });

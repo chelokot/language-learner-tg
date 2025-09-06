@@ -3,4 +3,3 @@ export async function startBot(...args: any[]) {
   const { startBot: startBotEdge } = await import('./bot.edge.js');
   return (startBotEdge as any)(...args);
 }
-}
