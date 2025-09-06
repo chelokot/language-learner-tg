@@ -28,6 +28,7 @@ import {
   listWordStatsForVocabulary,
   listWordsForVocabulary,
   updateWordAnswerStats,
+  getNextWordCandidates,
 } from '../services/word.js';
 import type { CustomContext } from '../types/context.js';
 import {
