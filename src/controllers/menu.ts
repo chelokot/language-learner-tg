@@ -41,6 +41,11 @@ import { CONVERSATION_NAMES } from './CONVERSATION_NAMES.js';
 
 export const menuController = new Composer<CustomContext>();
 
+function isExitCommand(text: string | undefined | null): boolean {
+  if (!text) return false;
+  return text === '/stop' || text === '/menu';
+}
+
 async function showMenu(ctx: CustomContext) {
   await ctx.reply(
     'Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them',
@@ -434,7 +439,7 @@ export async function exerciseConversation(
       if (dir === 'gn') {
         await ctx.reply(`Translate this word from ${goalLanguage} to ${nativeLanguage}:\n${word.goal}`);
         const answer = await waitText(conv);
-        if (answer === '/stop' || answer === '/menu') break;
+        if (isExitCommand(answer)) break;
 
         const result = await conv.external(() =>
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
@@ -444,7 +449,7 @@ export async function exerciseConversation(
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
-        if (answer === '/stop' || answer === '/menu') break;
+        if (isExitCommand(answer)) break;
 
         const result = await conv.external(() =>
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
@@ -482,7 +487,7 @@ export async function exerciseConversation(
         );
 
         const answer = await waitText(conv);
-        if (answer === '/stop' || answer === '/menu') {
+        if (isExitCommand(answer)) {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
           } catch (_e) {
@@ -518,7 +523,7 @@ export async function exerciseConversation(
         );
 
         const answer = await waitText(conv);
-        if (answer === '/stop' || answer === '/menu') {
+        if (isExitCommand(answer)) {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
           } catch (_e) {
