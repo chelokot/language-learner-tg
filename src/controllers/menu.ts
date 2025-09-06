@@ -434,7 +434,7 @@ export async function exerciseConversation(
       if (dir === 'gn') {
         await ctx.reply(`Translate this word from ${goalLanguage} to ${nativeLanguage}:\n${word.goal}`);
         const answer = await waitText(conv);
-        if (answer === '/stop') break;
+        if (answer === '/stop' || answer === '/menu') break;
 
         const result = await conv.external(() =>
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
@@ -444,7 +444,7 @@ export async function exerciseConversation(
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
-        if (answer === '/stop') break;
+        if (answer === '/stop' || answer === '/menu') break;
 
         const result = await conv.external(() =>
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
@@ -482,7 +482,7 @@ export async function exerciseConversation(
         );
 
         const answer = await waitText(conv);
-        if (answer === '/stop') {
+        if (answer === '/stop' || answer === '/menu') {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
           } catch (_e) {
@@ -518,7 +518,7 @@ export async function exerciseConversation(
         );
 
         const answer = await waitText(conv);
-        if (answer === '/stop') {
+        if (answer === '/stop' || answer === '/menu') {
           try {
             await ctx.api.deleteMessage(chatId, holderMsgId);
           } catch (_e) {
