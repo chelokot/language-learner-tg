@@ -21,6 +21,7 @@ import {
   listWordStatsForVocabulary,
   listWordsForVocabulary,
   updateWordAnswerStats,
+  getNextWordCandidates,
 } from '../services/word.js';
 import type { CustomContext } from '../types/context.js';
 import {
@@ -403,13 +404,23 @@ export async function exerciseConversation(
 
   let nextTaskHolderMsgId: number | null = null;
   const chatId = ctx.chat!.id;
+  const recentIds: number[] = [];
+  const maxRecent = 8;
 
   while (true) {
-    const word = await conv.external(() => getRandomWord({ db: ctx.db, vocabularyId: vocabId }));
+    // Pick next word preferring least-known, avoiding immediate repeats within the session
+    const candidates = await conv.external(() =>
+      getNextWordCandidates({ db: ctx.db, vocabularyId: vocabId, limit: 10 }),
+    );
+    const picked = candidates.find(w => !recentIds.includes(w.id)) ?? candidates[0];
+    const word = picked ?? null;
     if (!word) {
       await ctx.reply('This vocabulary has no words yet. Add some first.');
       break;
     }
+    // update recency buffer
+    recentIds.push(word.id);
+    if (recentIds.length > maxRecent) recentIds.shift();
 
     if (kind === 'word') {
       if (dir === 'gn') {

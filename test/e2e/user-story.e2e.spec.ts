@@ -169,7 +169,27 @@ function createMemoryDb(): Database {
         return { rows: [] };
       }
 
-      // --- words: random pick for exercise
+      // --- words: priority-ordered candidates for exercise (new selection)
+      if (
+        sql.startsWith("SELECT") &&
+        sql.includes("FROM word") &&
+        sql.includes("WHERE vocabulary_id=$1") &&
+        sql.includes("ORDER BY priority DESC")
+      ) {
+        const vsId = params[0];
+        const limit = params[1] ?? 10;
+        const pool = words.filter((w) => w.vocabulary_id === vsId);
+        // Sort by simple priority: mistakes first, then lower score
+        const sorted = pool.sort(
+          (a, b) =>
+            ((b.wrong_count ?? 0) - (b.correct_count ?? 0)) -
+              ((a.wrong_count ?? 0) - (a.correct_count ?? 0)) ||
+            (a.score ?? 0) - (b.score ?? 0)
+        );
+        return { rows: sorted.slice(0, limit) };
+      }
+
+      // --- words: random pick for exercise (legacy)
       if (
         sql.startsWith(
           "SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1",

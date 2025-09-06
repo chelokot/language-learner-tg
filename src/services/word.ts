@@ -166,6 +166,7 @@ export async function getRandomWord(args: {
   db: Database;
   vocabularyId: number;
 }): Promise<Word | null> {
+  // Deprecated in favor of getNextWordCandidates; kept for backward compatibility
   const result = await args.db.query<Word>(
     'SELECT id, vocabulary_id, goal, native FROM word WHERE vocabulary_id=$1 ORDER BY random() LIMIT 1',
     [args.vocabularyId],
@@ -187,8 +188,42 @@ export async function updateWordAnswerStats(args: {
     `UPDATE word
        SET correct_count = COALESCE(correct_count, 0) + CASE WHEN $2 THEN 1 ELSE 0 END,
            wrong_count   = COALESCE(wrong_count,   0) + CASE WHEN $2 THEN 0 ELSE 1 END,
-           score         = COALESCE(score, 0) + CASE WHEN $2 THEN 1 ELSE -1 END
+           score         = GREATEST(1, COALESCE(score, 0) + CASE WHEN $2 THEN 1 ELSE -1 END)
      WHERE id = $1`,
     [args.wordId, args.correct],
   );
+}
+
+/**
+ * Compute and return next candidate words ordered by priority.
+ * Priority favors higher error rate and lower score; ties are broken randomly.
+ */
+export async function getNextWordCandidates(args: {
+  db: Database;
+  vocabularyId: number;
+  limit: number;
+}): Promise<Array<Word & { score?: number; correct_count?: number; wrong_count?: number }>> {
+  const sql = `
+    SELECT
+      id,
+      vocabulary_id,
+      goal,
+      native,
+      COALESCE(score, 0) AS score,
+      COALESCE(correct_count, 0) AS correct_count,
+      COALESCE(wrong_count, 0) AS wrong_count,
+      (
+        3.0 * (COALESCE(wrong_count,0))::float / (
+          (COALESCE(correct_count,0) + COALESCE(wrong_count,0) + 1)::float
+        )
+        + 1.0 / (COALESCE(score,0)::float + 1.0)
+      ) AS priority
+    FROM word
+    WHERE vocabulary_id=$1
+    ORDER BY priority DESC, random()
+    LIMIT $2`;
+  const res = await args.db.query<
+    Word & { score?: number; correct_count?: number; wrong_count?: number; priority?: number }
+  >(sql, [args.vocabularyId, args.limit]);
+  return res.rows;
 }
