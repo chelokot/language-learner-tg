@@ -1,5 +1,3 @@
-import type { VercelPool } from '@vercel/postgres';
-
 export interface User {
   user_id: number;
   name: string;
@@ -11,4 +9,7 @@ export interface Chat {
   title: string;
 }
 
-export type Database = VercelPool;
+export type QueryResult<Row = any> = { rows: Row[] };
+export interface Database {
+  query: <Row = any>(text: string, params?: any[]) => Promise<QueryResult<Row>>;
+}

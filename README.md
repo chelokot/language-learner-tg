@@ -6,7 +6,7 @@ A spaced repetition Telegram bot built in TypeScript. The bot uses serverless fu
 
 * TypeScript
 * grammY via [ts-tg-bot](https://github.com/ExposedCat/ts-tg-bot)
-* Vercel Postgres via `@vercel/postgres`
+* Postgres (Vercel Postgres/Neon) via `@neondatabase/serverless` (Edge HTTP)
 * Vitest for tests
 * **OpenRouter** for auto-translation and sentence exercises
 
@@ -36,7 +36,6 @@ The repository follows a strict **test-driven development** approach. Every new 
 3. `npm test`
 
 Requirements: Node 20+, npm 10+. On Fedora: `sudo dnf install nodejs npm`.
-The optional `WEBHOOK_URL` environment variable can override `VERCEL_URL` when setting up the Telegram webhook.
 
 ### LLM features
 

@@ -2,13 +2,16 @@ import { fileURLToPath } from 'node:url';
 import { registerWebhook, runMigrations } from './deploy.js';
 
 async function main() {
+  if (process.env.SKIP_POSTDEPLOY === '1') {
+    return;
+  }
   await runMigrations();
-  const baseUrl = process.env.WEBHOOK_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
   if (!process.env.TOKEN) {
     throw new Error('TOKEN is not set');
   }
   if (!baseUrl) {
-    throw new Error('WEBHOOK_URL or VERCEL_URL must be set');
+    throw new Error('VERCEL_URL must be set');
   }
   await registerWebhook(process.env.TOKEN, baseUrl);
 }

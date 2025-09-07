@@ -1,9 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": ".",
-  "functions": {
-    "api/**/*.{js,ts}": {
-      "includeFiles": "src/locales/**"
-    }
-  }
+  "outputDirectory": ".vercel/output"
 }

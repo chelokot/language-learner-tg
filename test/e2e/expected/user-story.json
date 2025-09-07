@@ -103,20 +103,12 @@
     "buttons": []
   },
   { "role": "user", "text": "привет" },
-  { "role": "bot", "text": "Correct", "buttons": [] },
-  {
-    "role": "bot",
-    "text": "Translate this word from English to Russian:\nhello",
-    "buttons": []
-  },
+  { "role": "bot", "text": "Correct\nLooks fine.", "buttons": [] },
   { "role": "user", "text": "wrong" },
-  { "role": "bot", "text": "Incorrect. Right answer: привет", "buttons": [] },
-  {
-    "role": "bot",
-    "text": "Translate this word from English to Russian:\nhello",
-    "buttons": []
-  },
+  { "role": "bot", "text": "Translate this word from English to Russian:\nhello", "buttons": [] },
+  { "role": "bot", "text": "Incorrect. Right answer: привет\nConsider a closer synonym.", "buttons": [] },
   { "role": "user", "text": "/stop" },
+  { "role": "bot", "text": "Translate this word from English to Russian:\nhello", "buttons": [] },
   {
     "role": "bot",
     "text": "Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them",

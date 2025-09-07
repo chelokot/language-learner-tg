@@ -47,6 +47,7 @@ function isExitCommand(text: string | undefined | null): boolean {
 }
 
 async function showMenu(ctx: CustomContext) {
+  console.log('[E2E-DBG] showMenu');
   await ctx.reply(
     'Menu\n\nYou can create or select **vocabulary** — list of words to learn\\.\n\nYou can then choose **exercise** to train them',
     { reply_markup: kbMenu(), parse_mode: 'MarkdownV2' },
@@ -60,6 +61,7 @@ async function loadCurrentVocab(ctx: CustomContext): Promise<Vocabulary | null> 
 }
 
 async function showVocabularies(ctx: CustomContext) {
+  console.log('[E2E-DBG] showVocabularies');
   const vocabs = await listVocabularies({
     db: ctx.db,
     ownerId: ctx.dbEntities.user.user_id,
@@ -75,6 +77,7 @@ async function showVocabularies(ctx: CustomContext) {
 }
 
 async function showVocabulary(ctx: CustomContext, id: number) {
+  console.log('[E2E-DBG] showVocabulary', id);
   const vocab = await getVocabulary({ db: ctx.db, vocabularyId: id });
   if (!vocab) return;
 
@@ -110,6 +113,7 @@ async function showVocabulary(ctx: CustomContext, id: number) {
 }
 
 async function showExercises(ctx: CustomContext) {
+  console.log('[E2E-DBG] showExercises');
   const vocabs = await listVocabularies({
     db: ctx.db,
     ownerId: ctx.dbEntities.user.user_id,
@@ -209,7 +213,11 @@ menuController.callbackQuery(/open_vocab:(\d+)/, async ctx => {
 });
 menuController.callbackQuery('create_vocab', async ctx => {
   await ack(ctx);
-  await ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary);
+  console.log('[E2E-DBG] create_vocab tapped');
+  await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
+    parse_mode: 'MarkdownV2',
+  });
+  await ctx.conversation.enter(CONVERSATION_NAMES.createVocabulary, true as any);
 });
 menuController.callbackQuery(/add_word:(\d+)/, async ctx => {
   await ack(ctx);
@@ -268,20 +276,36 @@ menuController.callbackQuery(/list_words:(\d+)/, async ctx => {
 export async function createVocabularyConversation(
   conv: Conversation<CustomContext, CustomContext>,
   ctx: CustomContext,
+  firstPromptAlreadySent?: boolean,
 ) {
-  await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
-    parse_mode: 'MarkdownV2',
-  });
+  console.log('[E2E-DBG] enter createVocabularyConversation');
+  console.log('[E2E-DBG] ctx.chat?', JSON.stringify(ctx.chat));
+  if (!firstPromptAlreadySent) {
+    try {
+      await ctx.reply('Enter the name of the language you are learning \\(Goal language\\), for example `English`:', {
+        parse_mode: 'MarkdownV2',
+      });
+      console.log('[E2E-DBG] sent prompt: goal language');
+    } catch (e) {
+      console.log('[E2E-DBG] failed to send prompt', e);
+    }
+  }
+  console.log('[E2E-DBG] waiting goalLanguage text...');
   const goalLanguage = await waitText(conv);
+  console.log('[E2E-DBG] got goalLanguage', goalLanguage);
 
   await ctx.reply(
     'Enter the name of your language used for translations \\(Native language\\), for example `Russian`:',
     { parse_mode: 'MarkdownV2' },
   );
+  console.log('[E2E-DBG] waiting nativeLanguage text...');
   const nativeLanguage = await waitText(conv);
+  console.log('[E2E-DBG] got nativeLanguage', nativeLanguage);
 
   await ctx.reply('Now enter a name for this vocabulary, for example `c1 preparation`:', { parse_mode: 'MarkdownV2' });
+  console.log('[E2E-DBG] waiting name text...');
   const name = await waitText(conv);
+  console.log('[E2E-DBG] got name', name);
 
   await ctx.reply(
     'What target level is this vocabulary for? Answer in any format, for example: `c1`, `intermediate`, or `I am total beginner`:',
@@ -445,7 +469,9 @@ export async function exerciseConversation(
           judgeWordTranslation(word.goal, goalLanguage, nativeLanguage, word.native, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.native}`);
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.native}\n${result.feedback}`,
+        );
       } else {
         await ctx.reply(`Translate this word from ${nativeLanguage} to ${goalLanguage}:\n${word.native}`);
         const answer = await waitText(conv);
@@ -455,7 +481,9 @@ export async function exerciseConversation(
           judgeWordTranslation(word.native, nativeLanguage, goalLanguage, word.goal, answer, level),
         );
         await conv.external(() => updateWordAnswerStats({ db: ctx.db, wordId: word.id, correct: result.ok }));
-        await ctx.reply(result.ok ? `Correct` : `Incorrect. Right answer: ${word.goal}`);
+        await ctx.reply(
+          result.ok ? `Correct\n${result.feedback}` : `Incorrect. Right answer: ${word.goal}\n${result.feedback}`,
+        );
       }
     } else {
       const examples = await getRecentSentenceExamples({

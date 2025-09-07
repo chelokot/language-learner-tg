@@ -5,7 +5,11 @@
     "configFile": "vitest.config.ts"
   },
   "mutate": [
-    "src/**/*.ts",
+    "src/config/**/*.ts",
+    "!src/controllers/**/*.ts",
+    "!src/ui/**/*.ts",
+    "src/helpers/wait-text.ts",
+    "src/services/{chat,context,exercise,user,vocabulary,word}.ts",
     "!src/**/*.d.ts",
     "!src/**/__mocks__/*.ts"
   ],
