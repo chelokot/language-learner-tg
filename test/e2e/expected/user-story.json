@@ -52,6 +52,7 @@
     "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 0\n\nBest learned words:\n\nLeast learned words:",
     "buttons": [
       "Add word",
+      "Show all words",
       "Delete words…",
       "Select Vocabulary",
       "Rename Vocabulary",
@@ -133,6 +134,7 @@
     "text": "Vocabulary c1 preparation (Russian → English)\n\nLevel: c1\nTotal amount of words: 1\n\nBest learned words:\n1. hello/привет - 1 correct, 1 mistakes\n\nLeast learned words:\n1. hello/привет - 1 correct, 1 mistakes",
     "buttons": [
       "Add word",
+      "Show all words",
       "Delete words…",
       "Select Vocabulary",
       "Rename Vocabulary",
